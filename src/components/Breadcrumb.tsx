@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import { ChevronRight, Home } from "lucide-react";
 
 export interface BreadcrumbItem {
   label: string;
@@ -17,73 +16,62 @@ export default function Breadcrumb({ items, style }: BreadcrumbProps) {
     <nav
       aria-label="Breadcrumb"
       style={{
-        padding: "12px 0",
-        fontSize: "13px",
-        color: "#66726d",
+        padding: "16px 0 12px",
+        fontSize: "12.5px",
+        color: "#88948e",
         fontWeight: 400,
+        letterSpacing: "0.1px",
         ...style
       }}
     >
       <div className="container">
-        <ol
+        <div
           style={{
             display: "flex",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: "8px",
-            listStyle: "none",
-            margin: 0,
-            padding: 0
+            gap: "0px",
+            lineHeight: 1.4
           }}
         >
           {/* Home Link */}
-          <li style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <Link
-              href="/"
-              style={{
-                color: "#55635d",
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                transition: "color 0.2s ease"
-              }}
-            >
-              <Home size={14} color="var(--green)" />
-              <span>Trang chủ</span>
-            </Link>
-          </li>
+          <Link
+            href="/"
+            style={{
+              color: "#7e8b85",
+              textDecoration: "none",
+              transition: "color 0.2s ease"
+            }}
+          >
+            Trang chủ
+          </Link>
 
           {/* Breadcrumb Items */}
           {items.map((item, index) => {
             const isLast = index === items.length - 1;
             return (
               <React.Fragment key={index}>
-                <li style={{ display: "flex", alignItems: "center", color: "#b5c0ba" }}>
-                  <ChevronRight size={13} />
-                </li>
-                <li style={{ display: "flex", alignItems: "center" }}>
-                  {isLast || !item.href ? (
-                    <span style={{ color: "#111111", fontWeight: 600 }}>
-                      {item.label}
-                    </span>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      style={{
-                        color: "#55635d",
-                        textDecoration: "none",
-                        transition: "color 0.2s ease"
-                      }}
-                    >
-                      {item.label}
-                    </Link>
-                  )}
-                </li>
+                <span style={{ margin: "0 7px", color: "#c5ceca", fontSize: "11px" }}>/</span>
+                {isLast || !item.href ? (
+                  <span style={{ color: "#222222", fontWeight: 500 }}>
+                    {item.label}
+                  </span>
+                ) : (
+                  <Link
+                    href={item.href}
+                    style={{
+                      color: "#7e8b85",
+                      textDecoration: "none",
+                      transition: "color 0.2s ease"
+                    }}
+                  >
+                    {item.label}
+                  </Link>
+                )}
               </React.Fragment>
             );
           })}
-        </ol>
+        </div>
       </div>
     </nav>
   );

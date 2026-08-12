@@ -17,14 +17,12 @@ export default function CategoryDetailView({ category, categoryProducts }: Categ
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh", paddingBottom: "5rem" }}>
       {/* Breadcrumb Navigation Bar */}
-      <div style={{ background: "#ffffff", borderBottom: "1px solid #eeeeee" }}>
-        <Breadcrumb
-          items={[
-            { label: "Danh mục", href: "/categories" },
-            { label: category.name }
-          ]}
-        />
-      </div>
+      <Breadcrumb
+        items={[
+          { label: "Danh mục", href: "/categories" },
+          { label: category.name }
+        ]}
+      />
 
       {/* Minimal Category Header Banner */}
       <section

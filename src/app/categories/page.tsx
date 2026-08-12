@@ -36,9 +36,7 @@ export default function CategoriesPage() {
   return (
     <div style={{ backgroundColor: "#fafafa", paddingBottom: "5rem" }}>
       {/* Breadcrumb Navigation Bar */}
-      <div style={{ background: "#ffffff", borderBottom: "1px solid #eeeeee" }}>
-        <Breadcrumb items={[{ label: "Thương hiệu & Danh mục" }]} />
-      </div>
+      <Breadcrumb items={[{ label: "Thương hiệu & Danh mục" }]} />
       
       {/* 1. Header Banner - BOLD H1 */}
       <section style={{ backgroundColor: "#fafbf8", padding: "52px 0 36px", borderBottom: "1px solid #eee" }}>

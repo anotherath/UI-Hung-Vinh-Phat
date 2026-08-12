@@ -90,17 +90,15 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
   return (
     <div style={{ backgroundColor: "#ffffff", paddingBottom: "5rem" }}>
       {/* Breadcrumb Navigation Bar */}
-      <div style={{ background: "#fafbf9", borderBottom: "1px solid #f0f3f1", marginBottom: "32px" }}>
-        <Breadcrumb
-          items={[
-            { label: "Sản phẩm", href: "/products" },
-            { label: product.categoryName, href: `/category/${product.categorySlug}` },
-            { label: product.name }
-          ]}
-        />
-      </div>
+      <Breadcrumb
+        items={[
+          { label: "Sản phẩm", href: "/products" },
+          { label: product.categoryName, href: `/category/${product.categorySlug}` },
+          { label: product.name }
+        ]}
+      />
 
-      <div className="container">
+      <div className="container" style={{ marginTop: "16px" }}>
         
         {/* MAIN PRODUCT SHOWCASE (2-COLUMN GRID) */}
         <div

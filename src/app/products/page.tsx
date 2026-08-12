@@ -39,9 +39,7 @@ function ProductsContent() {
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh", paddingBottom: "5rem" }}>
       {/* Breadcrumb Navigation Bar */}
-      <div style={{ background: "#ffffff", borderBottom: "1px solid #eeeeee" }}>
-        <Breadcrumb items={[{ label: isSearchMode ? `Tìm kiếm: ${qParam}` : "Tất cả sản phẩm" }]} />
-      </div>
+      <Breadcrumb items={[{ label: isSearchMode ? `Tìm kiếm: ${qParam}` : "Tất cả sản phẩm" }]} />
 
       {/* Header Banner */}
       <section className="section" style={{ background: "#fafbf8", borderBottom: "1px solid #eee", padding: "52px 0 36px" }}>
