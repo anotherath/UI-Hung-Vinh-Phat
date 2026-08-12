@@ -17,7 +17,7 @@ export default function Breadcrumb({ items, style }: BreadcrumbProps) {
       aria-label="Breadcrumb"
       style={{
         padding: "16px 0 12px",
-        fontSize: "12.5px",
+        fontSize: "13.5px",
         color: "#88948e",
         fontWeight: 400,
         letterSpacing: "0.1px",
@@ -51,7 +51,7 @@ export default function Breadcrumb({ items, style }: BreadcrumbProps) {
             const isLast = index === items.length - 1;
             return (
               <React.Fragment key={index}>
-                <span style={{ margin: "0 7px", color: "#c5ceca", fontSize: "11px" }}>/</span>
+                <span style={{ margin: "0 8px", color: "#b5c0ba", fontSize: "12px" }}>/</span>
                 {isLast || !item.href ? (
                   <span style={{ color: "#222222", fontWeight: 500 }}>
                     {item.label}
