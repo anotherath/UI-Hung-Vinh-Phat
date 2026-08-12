@@ -6,6 +6,8 @@
 > ☎ **Hotline**: 0889.39.2000 • 0914.214.668  
 > 🌐 **Website**: [https://github.com/anotherath/UI-Hung-Vinh-Phat](https://github.com/anotherath/UI-Hung-Vinh-Phat)
 
+![Hưng Vinh Phát Social Preview Banner](public/images/og-preview.jpg)
+
 ---
 
 ## 📌 GIỚI THIỆU DỰ ÁN
