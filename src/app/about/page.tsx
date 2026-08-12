@@ -10,7 +10,7 @@ export default function AboutPage() {
   return (
     <div style={{ backgroundColor: "#ffffff", paddingBottom: "5rem" }}>
       {/* Breadcrumb Navigation Bar */}
-      <Breadcrumb items={[{ label: "Giới thiệu & Liên hệ" }]} />
+      <Breadcrumb items={[{ label: "Giới thiệu" }]} />
       
       {/* 1. Header Banner */}
       <section style={{ backgroundColor: "#fafbf8", padding: "52px 0 36px", borderBottom: "1px solid #eee" }}>

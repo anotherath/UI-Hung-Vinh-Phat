@@ -19,7 +19,7 @@ export default function CategoryDetailView({ category, categoryProducts }: Categ
       {/* Breadcrumb Navigation Bar */}
       <Breadcrumb
         items={[
-          { label: "Danh mục", href: "/categories" },
+          { label: "Danh mục sản phẩm", href: "/categories" },
           { label: category.name }
         ]}
       />

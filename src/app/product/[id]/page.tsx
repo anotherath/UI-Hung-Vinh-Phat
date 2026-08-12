@@ -92,7 +92,7 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
       {/* Breadcrumb Navigation Bar */}
       <Breadcrumb
         items={[
-          { label: "Sản phẩm", href: "/products" },
+          { label: "Danh mục sản phẩm", href: "/categories" },
           { label: product.categoryName, href: `/category/${product.categorySlug}` },
           { label: product.name }
         ]}
