@@ -94,8 +94,9 @@ export default function ProductSection() {
             overflowX: "auto",
             scrollSnapType: "x mandatory",
             scrollBehavior: "smooth",
-            paddingBottom: "16px",
-            width: "100%",
+            padding: "16px 6px 28px 6px",
+            margin: "-12px -6px -12px -6px",
+            width: "calc(100% + 12px)",
             WebkitOverflowScrolling: "touch"
           }}
         >
