@@ -37,11 +37,11 @@ export default function ProductCard({
       {/* Clickable Image */}
       {detailUrl ? (
         <Link href={detailUrl} style={{ display: "block", overflow: "hidden", cursor: "pointer" }}>
-          <img src={image} alt={name} style={{ transition: "transform 0.3s ease" }} />
+          <img src={image} alt={name} loading="lazy" decoding="async" style={{ transition: "transform 0.3s ease" }} />
         </Link>
       ) : (
         <div onClick={handleContainerClick} style={{ cursor: "pointer", overflow: "hidden" }}>
-          <img src={image} alt={name} style={{ transition: "transform 0.3s ease" }} />
+          <img src={image} alt={name} loading="lazy" decoding="async" style={{ transition: "transform 0.3s ease" }} />
         </div>
       )}
 

@@ -170,8 +170,7 @@ header {
 /* Hero Section */
 .hero {
   min-height: 590px;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.22)),
-    url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1800&q=85') center/cover;
+  background: #000;
   display: flex;
   align-items: center;
   color: #fff;

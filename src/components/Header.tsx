@@ -92,6 +92,7 @@ export default function Header() {
                 src="/images/logo.png"
                 alt="Logo Hưng Vinh Phát"
                 fill
+                sizes="54px"
                 style={{ objectFit: "contain", borderRadius: "10px" }}
                 priority
               />

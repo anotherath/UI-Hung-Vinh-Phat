@@ -123,6 +123,8 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
               <img
                 src={activeImg}
                 alt={product.name}
+                fetchPriority="high"
+                decoding="async"
                 style={{
                   width: "100%",
                   height: "100%",
