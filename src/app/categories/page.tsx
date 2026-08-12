@@ -30,9 +30,15 @@ const SHOWROOM_BRANDS: BrandCardItem[] = [
   { name: "VAS", sub: "Thép xây dựng • Thép móng công trình", img: "/images/steel_construction.jpg", categorySlug: "sat-thep" }
 ];
 
+import Breadcrumb from "@/components/Breadcrumb";
+
 export default function CategoriesPage() {
   return (
     <div style={{ backgroundColor: "#fafafa", paddingBottom: "5rem" }}>
+      {/* Breadcrumb Navigation Bar */}
+      <div style={{ background: "#ffffff", borderBottom: "1px solid #eeeeee" }}>
+        <Breadcrumb items={[{ label: "Thương hiệu & Danh mục" }]} />
+      </div>
       
       {/* 1. Header Banner - BOLD H1 */}
       <section style={{ backgroundColor: "#fafbf8", padding: "52px 0 36px", borderBottom: "1px solid #eee" }}>

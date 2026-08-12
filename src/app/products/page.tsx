@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { SAMPLE_PRODUCTS, COMPANY_INFO } from "@/data/companyData";
 import ProductCard from "@/components/ProductCard";
 import { Phone, SearchX } from "lucide-react";
+import Breadcrumb from "@/components/Breadcrumb";
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -37,6 +38,11 @@ function ProductsContent() {
 
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh", paddingBottom: "5rem" }}>
+      {/* Breadcrumb Navigation Bar */}
+      <div style={{ background: "#ffffff", borderBottom: "1px solid #eeeeee" }}>
+        <Breadcrumb items={[{ label: isSearchMode ? `Tìm kiếm: ${qParam}` : "Tất cả sản phẩm" }]} />
+      </div>
+
       {/* Header Banner */}
       <section className="section" style={{ background: "#fafbf8", borderBottom: "1px solid #eee", padding: "52px 0 36px" }}>
         <div className="container">

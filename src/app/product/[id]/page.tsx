@@ -7,6 +7,8 @@ import { SAMPLE_PRODUCTS } from "@/data/companyData";
 import ProductCard from "@/components/ProductCard";
 import { CheckCircle2, ZoomIn, X, ChevronLeft, ChevronRight } from "lucide-react";
 
+import Breadcrumb from "@/components/Breadcrumb";
+
 interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
@@ -86,7 +88,18 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
     : [...relatedProducts, ...SAMPLE_PRODUCTS.filter(p => p.id !== product.id && !relatedProducts.includes(p))].slice(0, 4);
 
   return (
-    <div style={{ backgroundColor: "#ffffff", padding: "40px 0 5rem" }}>
+    <div style={{ backgroundColor: "#ffffff", paddingBottom: "5rem" }}>
+      {/* Breadcrumb Navigation Bar */}
+      <div style={{ background: "#fafbf9", borderBottom: "1px solid #f0f3f1", marginBottom: "32px" }}>
+        <Breadcrumb
+          items={[
+            { label: "Sản phẩm", href: "/products" },
+            { label: product.categoryName, href: `/category/${product.categorySlug}` },
+            { label: product.name }
+          ]}
+        />
+      </div>
+
       <div className="container">
         
         {/* MAIN PRODUCT SHOWCASE (2-COLUMN GRID) */}

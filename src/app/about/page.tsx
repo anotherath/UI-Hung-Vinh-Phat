@@ -4,9 +4,15 @@ import { COMPANY_INFO } from "@/data/companyData";
 import ProductCard from "@/components/ProductCard";
 import { FileText, MapPin, Phone, Mail, Clock, BadgeCheck, Handshake, Truck, Award } from "lucide-react";
 
+import Breadcrumb from "@/components/Breadcrumb";
+
 export default function AboutPage() {
   return (
     <div style={{ backgroundColor: "#ffffff", paddingBottom: "5rem" }}>
+      {/* Breadcrumb Navigation Bar */}
+      <div style={{ background: "#ffffff", borderBottom: "1px solid #eeeeee" }}>
+        <Breadcrumb items={[{ label: "Giới thiệu & Liên hệ" }]} />
+      </div>
       
       {/* 1. Header Banner */}
       <section style={{ backgroundColor: "#fafbf8", padding: "52px 0 36px", borderBottom: "1px solid #eee" }}>

@@ -5,6 +5,8 @@ import { ProductCategory, Product, COMPANY_INFO } from "@/data/companyData";
 import ProductCard from "@/components/ProductCard";
 import { Phone } from "lucide-react";
 
+import Breadcrumb from "@/components/Breadcrumb";
+
 interface CategoryDetailViewProps {
   category: ProductCategory;
   categoryProducts: Product[];
@@ -14,6 +16,16 @@ export default function CategoryDetailView({ category, categoryProducts }: Categ
 
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh", paddingBottom: "5rem" }}>
+      {/* Breadcrumb Navigation Bar */}
+      <div style={{ background: "#ffffff", borderBottom: "1px solid #eeeeee" }}>
+        <Breadcrumb
+          items={[
+            { label: "Danh mục", href: "/categories" },
+            { label: category.name }
+          ]}
+        />
+      </div>
+
       {/* Minimal Category Header Banner */}
       <section
         style={{
