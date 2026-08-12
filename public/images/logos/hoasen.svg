@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="150" height="50">
+  <rect width="300" height="100" rx="12" fill="#FFFFFF" stroke="#E2E8E4" stroke-width="2"/>
+  <path fill="#E31818" d="M35 50c0-12 8-22 18-22s18 10 18 22-8 22-18 22-18-10-18-22z"/>
+  <path fill="#FFD700" d="M53 32c-6 8-6 18 0 26 6-8 6-18 0-26z"/>
+  <text x="88" y="55" font-family="'Be Vietnam Pro', sans-serif" font-weight="900" font-size="22" fill="#E31818">HOA SEN</text>
+  <text x="88" y="74" font-family="'Be Vietnam Pro', sans-serif" font-weight="700" font-size="14" fill="#0B3B32" letter-spacing="2">HOME</text>
+</svg>
