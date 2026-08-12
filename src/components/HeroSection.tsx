@@ -5,15 +5,15 @@ import Image from "next/image";
 export default function HeroSection() {
   return (
     <section className="hero" id="home" style={{ position: "relative", overflow: "hidden" }}>
-      {/* High-Priority Preloaded Next.js Local Hero Image */}
+      {/* Preloaded Local Hero Architecture Image */}
       <Image
-        src="/images/hero_bright_architecture.jpg"
+        src="/images/hero_architecture.jpg"
         alt="Hưng Vinh Phát - Vật liệu xây dựng & kiến trúc cao cấp"
         fill
         priority
         fetchPriority="high"
         sizes="100vw"
-        quality={85}
+        quality={88}
         style={{
           objectFit: "cover",
           objectPosition: "center",
@@ -21,7 +21,7 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Dark Overlay Gradient Tint for High Readability */}
+      {/* Dark Overlay Gradient Tint */}
       <div
         style={{
           position: "absolute",
@@ -29,7 +29,7 @@ export default function HeroSection() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: "linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0.25) 100%)",
+          background: "linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.38) 60%, rgba(0, 0, 0, 0.22) 100%)",
           zIndex: 1
         }}
       />
