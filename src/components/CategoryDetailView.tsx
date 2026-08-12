@@ -16,14 +16,6 @@ export default function CategoryDetailView({ category, categoryProducts }: Categ
 
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh", paddingBottom: "5rem" }}>
-      {/* Breadcrumb Navigation Bar */}
-      <Breadcrumb
-        items={[
-          { label: "Danh mục sản phẩm", href: "/categories" },
-          { label: category.name }
-        ]}
-      />
-
       {/* Minimal Category Header Banner */}
       <section
         style={{
@@ -42,11 +34,19 @@ export default function CategoryDetailView({ category, categoryProducts }: Categ
           <h1 style={{ fontSize: "36px", color: "#fff", margin: "8px 0 12px", fontWeight: 700, lineHeight: 1.25 }}>
             {category.name}
           </h1>
-          <p style={{ fontSize: "15px", color: "#e0e8e4", maxWidth: "700px", lineHeight: 1.7, fontWeight: 400 }}>
+          <p style={{ fontSize: "15px", color: "#e0e8e4", maxWidth: "700px", lineHeight: 1.7, fontWeight: 400, margin: 0 }}>
             {category.description}
           </p>
         </div>
       </section>
+
+      {/* Breadcrumb Navigation Bar */}
+      <Breadcrumb
+        items={[
+          { label: "Danh mục sản phẩm", href: "/categories" },
+          { label: category.name }
+        ]}
+      />
 
       {/* Main Products Catalogue Container */}
       <div className="container" style={{ paddingTop: "36px" }}>

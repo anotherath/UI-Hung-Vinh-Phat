@@ -35,9 +35,6 @@ import Breadcrumb from "@/components/Breadcrumb";
 export default function CategoriesPage() {
   return (
     <div style={{ backgroundColor: "#fafafa", paddingBottom: "5rem" }}>
-      {/* Breadcrumb Navigation Bar */}
-      <Breadcrumb items={[{ label: "Danh mục sản phẩm" }]} />
-      
       {/* 1. Header Banner - BOLD H1 */}
       <section style={{ backgroundColor: "#fafbf8", padding: "52px 0 36px", borderBottom: "1px solid #eee" }}>
         <div className="container">
@@ -47,11 +44,14 @@ export default function CategoriesPage() {
           <h1 style={{ fontSize: "36px", fontWeight: 700, color: "var(--green)", margin: "8px 0 10px" }}>
             Chọn thương hiệu để xem sản phẩm
           </h1>
-          <p style={{ fontSize: "15px", color: "#66726d", maxWidth: "760px", lineHeight: 1.7, fontWeight: 400 }}>
+          <p style={{ fontSize: "15px", color: "#66726d", maxWidth: "760px", lineHeight: 1.7, fontWeight: 400, margin: 0 }}>
             Bấm vào từng thương hiệu để mở danh mục sản phẩm tương ứng và nhận báo giá trực tiếp từ kho Hưng Vinh Phát.
           </p>
         </div>
       </section>
+
+      {/* Breadcrumb Navigation Bar */}
+      <Breadcrumb items={[{ label: "Danh mục sản phẩm" }]} />
 
       {/* 2. DIRECT BRAND CARDS SHOWCASE */}
       <section style={{ padding: "52px 0", backgroundColor: "#fafafa" }}>

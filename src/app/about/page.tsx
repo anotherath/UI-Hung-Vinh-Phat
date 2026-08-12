@@ -9,9 +9,6 @@ import Breadcrumb from "@/components/Breadcrumb";
 export default function AboutPage() {
   return (
     <div style={{ backgroundColor: "#ffffff", paddingBottom: "5rem" }}>
-      {/* Breadcrumb Navigation Bar */}
-      <Breadcrumb items={[{ label: "Giới thiệu" }]} />
-      
       {/* 1. Header Banner */}
       <section style={{ backgroundColor: "#fafbf8", padding: "52px 0 36px", borderBottom: "1px solid #eee" }}>
         <div className="container">
@@ -19,11 +16,14 @@ export default function AboutPage() {
           <h1 style={{ fontSize: "36px", fontWeight: 700, color: "var(--green)", margin: "8px 0 10px" }}>
             Về Công Ty Hưng Vinh Phát
           </h1>
-          <p style={{ fontSize: "15px", color: "#66726d", maxWidth: "750px", lineHeight: 1.7, fontWeight: 400 }}>
+          <p style={{ fontSize: "15px", color: "#66726d", maxWidth: "750px", lineHeight: 1.7, fontWeight: 400, margin: 0 }}>
             {COMPANY_INFO.name} — Nhà phân phối chính thức hệ thống Hoa Sen Home. Uy tín trong từng sản phẩm, trách nhiệm trong từng công trình từ năm 2015.
           </p>
         </div>
       </section>
+
+      {/* Breadcrumb Navigation Bar */}
+      <Breadcrumb items={[{ label: "Giới thiệu" }]} />
 
       {/* 2. Thư Ngỏ Ban Giám Đốc */}
       <section style={{ padding: "56px 0", borderBottom: "1px solid #f0f2f0" }}>

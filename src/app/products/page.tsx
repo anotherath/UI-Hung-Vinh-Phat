@@ -38,15 +38,6 @@ function ProductsContent() {
 
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh", paddingBottom: "5rem" }}>
-      {/* Breadcrumb Navigation Bar */}
-      <Breadcrumb
-        items={
-          isSearchMode
-            ? [{ label: "Tất cả sản phẩm", href: "/products" }, { label: `Tìm kiếm: "${qParam}"` }]
-            : [{ label: "Tất cả sản phẩm" }]
-        }
-      />
-
       {/* Header Banner */}
       <section className="section" style={{ background: "#fafbf8", borderBottom: "1px solid #eee", padding: "52px 0 36px" }}>
         <div className="container">
@@ -56,13 +47,22 @@ function ProductsContent() {
           <h1 style={{ fontSize: "36px", color: "var(--green)", margin: "8px 0 10px", fontWeight: 700 }}>
             {isSearchMode ? `Tìm kiếm: "${qParam}"` : "Tất Cả Sản Phẩm"}
           </h1>
-          <p style={{ color: "#66726d", maxWidth: "720px", fontSize: "15px", lineHeight: 1.7, fontWeight: 400 }}>
+          <p style={{ color: "#66726d", maxWidth: "720px", fontSize: "15px", lineHeight: 1.7, fontWeight: 400, margin: 0 }}>
             {isSearchMode
               ? `Hiển thị các sản phẩm và vật liệu xây dựng phù hợp với từ khóa "${qParam}" từ tổng kho Hưng Vinh Phát.`
               : "Khám phá trọn bộ danh mục vật liệu xây dựng phần thô & thiết bị được Hưng Vinh Phát phân phối chính hãng kèm chứng nhận CO/CQ rõ ràng."}
           </p>
         </div>
       </section>
+
+      {/* Breadcrumb Navigation Bar */}
+      <Breadcrumb
+        items={
+          isSearchMode
+            ? [{ label: "Tất cả sản phẩm", href: "/products" }, { label: `Tìm kiếm: "${qParam}"` }]
+            : [{ label: "Tất cả sản phẩm" }]
+        }
+      />
 
       {/* Main Products Container */}
       <div className="container" style={{ paddingTop: "32px" }}>
