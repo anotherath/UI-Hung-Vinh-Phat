@@ -1003,12 +1003,12 @@ export default function AdminDashboardPage() {
                       Mô tả sản phẩm <span style={{ color: "#f43f5e" }}>*</span>
                     </label>
                     <textarea
-                      rows={3}
+                      rows={5}
                       required
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="Nhập thông tin mô tả quy cách, xuất xứ, ứng dụng công trình..."
-                      style={{ width: "100%", padding: "9px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontSize: "13px", outline: "none", boxSizing: "border-box", resize: "vertical" }}
+                      style={{ width: "100%", minHeight: "120px", lineHeight: "1.6", padding: "10px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontSize: "13px", outline: "none", boxSizing: "border-box", resize: "vertical" }}
                     />
                   </div>
 
@@ -1260,12 +1260,12 @@ export default function AdminDashboardPage() {
                       Mô tả ngành hàng <span style={{ color: "#f43f5e" }}>*</span>
                     </label>
                     <textarea
-                      rows={2}
+                      rows={5}
                       required
                       value={catDesc}
                       onChange={(e) => setCatDesc(e.target.value)}
                       placeholder="Nhập mô tả ứng dụng, phân phối của ngành hàng..."
-                      style={{ width: "100%", padding: "9px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontSize: "13px", outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", minHeight: "120px", lineHeight: "1.6", padding: "10px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontSize: "13px", outline: "none", boxSizing: "border-box", resize: "vertical" }}
                     />
                   </div>
 
@@ -1518,12 +1518,12 @@ export default function AdminDashboardPage() {
                       Mô tả thương hiệu <span style={{ color: "#f43f5e" }}>*</span>
                     </label>
                     <textarea
-                      rows={2}
+                      rows={5}
                       required
                       value={brandDesc}
                       onChange={(e) => setBrandDesc(e.target.value)}
                       placeholder="Nhập thông tin giới thiệu uy tín, chất lượng thương hiệu..."
-                      style={{ width: "100%", padding: "9px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontSize: "13px", outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", minHeight: "120px", lineHeight: "1.6", padding: "10px 12px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontSize: "13px", outline: "none", boxSizing: "border-box", resize: "vertical" }}
                     />
                   </div>
 
