@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { AlertTriangle, RotateCcw } from "lucide-react";
+import { AlertCircle, RotateCcw } from "lucide-react";
 
 export default function GlobalError({
   error,
@@ -25,7 +25,7 @@ export default function GlobalError({
           margin: 0,
           padding: 0,
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-          backgroundColor: "#f7f9f7",
+          backgroundColor: "#fafbf9",
           color: "#1a2522",
           display: "flex",
           alignItems: "center",
@@ -33,41 +33,29 @@ export default function GlobalError({
           minHeight: "100vh"
         }}
       >
-        <div
-          style={{
-            maxWidth: "520px",
-            width: "90%",
-            margin: "20px auto",
-            backgroundColor: "#ffffff",
-            borderRadius: "16px",
-            border: "1px solid #e1e7e3",
-            boxShadow: "0 12px 36px rgba(0,0,0,0.08)",
-            padding: "40px 28px",
-            textAlign: "center"
-          }}
-        >
+        <div style={{ maxWidth: "440px", width: "90%", textAlign: "center", padding: "20px" }}>
           <div
             style={{
-              width: "60px",
-              height: "60px",
+              width: "56px",
+              height: "56px",
               borderRadius: "50%",
-              backgroundColor: "rgba(211, 47, 47, 0.1)",
-              color: "#d32f2f",
-              display: "flex",
+              backgroundColor: "rgba(239, 68, 68, 0.1)",
+              color: "#ef4444",
+              display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              margin: "0 auto 16px"
+              marginBottom: "16px"
             }}
           >
-            <AlertTriangle size={30} />
+            <AlertCircle size={28} />
           </div>
 
-          <h1 style={{ fontSize: "22px", fontWeight: 700, margin: "0 0 10px", color: "#0b3b32" }}>
-            Hưng Vinh Phát - Sự Cố Tải Hệ Thống
+          <h1 style={{ fontSize: "22px", fontWeight: 700, margin: "0 0 10px", color: "#1a2522" }}>
+            Đã xảy ra lỗi hệ thống
           </h1>
 
-          <p style={{ fontSize: "14px", color: "#5d6d67", lineHeight: 1.6, margin: "0 0 24px" }}>
-            Đã xảy ra lỗi nghiêm trọng khi khởi tạo giao diện hệ thống. Quý khách vui lòng thử tải lại trang.
+          <p style={{ fontSize: "14.5px", color: "#63706b", lineHeight: 1.6, margin: "0 0 24px" }}>
+            Hệ thống gặp sự cố khi tải giao diện. Quý khách vui lòng thử tải lại trang.
           </p>
 
           <button
@@ -78,7 +66,7 @@ export default function GlobalError({
               gap: "8px",
               backgroundColor: "#0b3b32",
               color: "#ffffff",
-              padding: "12px 24px",
+              padding: "11px 22px",
               borderRadius: "8px",
               fontWeight: 600,
               fontSize: "14px",
@@ -87,7 +75,7 @@ export default function GlobalError({
             }}
           >
             <RotateCcw size={16} />
-            <span>Tải Lại Ứng Dụng</span>
+            <span>Tải Lại Trang</span>
           </button>
         </div>
       </body>
