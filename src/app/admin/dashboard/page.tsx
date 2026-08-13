@@ -1568,10 +1568,7 @@ export default function AdminDashboardPage() {
                             <div style={{ width: "42px", height: "42px", borderRadius: "6px", overflow: "hidden", background: "#0a1714", border: "1px solid rgba(198, 161, 91, 0.3)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <img src={b.image || "/images/logo.png"} alt={b.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             </div>
-                            <div>
-                              <div style={{ fontWeight: 600, color: "#fff", fontSize: "13.5px" }}>{b.name}</div>
-                              <span style={{ fontSize: "10.5px", color: "#c6a15b", fontWeight: 700 }}>{b.logoText}</span>
-                            </div>
+                            <span style={{ fontWeight: 600, color: "#fff", fontSize: "13.5px" }}>{b.name}</span>
                           </div>
                         </td>
                         <td style={{ padding: "10px 14px", color: "rgba(255,255,255,0.6)", fontFamily: "monospace" }}>
