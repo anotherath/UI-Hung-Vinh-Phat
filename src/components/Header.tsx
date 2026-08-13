@@ -28,6 +28,8 @@ export default function Header() {
     { href: "/about", label: "Về chúng tôi" },
   ];
 
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <>
       {/* Top Bar — Sleek Single Horizontal Row */}

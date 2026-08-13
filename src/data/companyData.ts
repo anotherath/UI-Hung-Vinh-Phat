@@ -39,6 +39,7 @@ export interface Brand {
   name: string;
   logoText: string;
   tagline: string;
+  image?: string;
   isStrategicPartner?: boolean;
   description: string;
 }
@@ -309,6 +310,7 @@ export const BRANDS: Brand[] = [
     name: "Hoa Sen Home",
     logoText: "HOA SEN HOME",
     tagline: "Đối tác chiến lược - Phân phối độc quyền",
+    image: "/images/roofing_aluminum.jpg",
     isStrategicPartner: true,
     description: "Thương hiệu quốc gia dẫn đầu về tôn, thép ống, nhựa và vật liệu xây dựng hoàn thiện."
   },
@@ -317,6 +319,7 @@ export const BRANDS: Brand[] = [
     name: "Thép Hòa Phát",
     logoText: "HÒA PHÁT",
     tagline: "Hòa hợp cùng phát triển",
+    image: "/images/steel_construction.jpg",
     description: "Tập đoàn sản xuất thép hàng đầu Việt Nam với chất lượng công trình đạt chuẩn quốc tế."
   },
   {
@@ -324,6 +327,7 @@ export const BRANDS: Brand[] = [
     name: "Viglacera",
     logoText: "VIGLACERA",
     tagline: "Tiên phong công nghệ xanh",
+    image: "/images/sanitary_ware.jpg",
     description: "Thương hiệu vật liệu xây dựng và thiết bị vệ sinh hàng đầu tại Việt Nam."
   },
   {
@@ -331,6 +335,7 @@ export const BRANDS: Brand[] = [
     name: "Thiết bị vệ sinh INAX",
     logoText: "INAX",
     tagline: "Công nghệ Nhật Bản",
+    image: "/images/sanitary_ware.jpg",
     description: "Thương hiệu thiết bị vệ sinh cao cấp phong cách Nhật Bản tinh tế."
   },
   {
@@ -338,6 +343,7 @@ export const BRANDS: Brand[] = [
     name: "Thép Việt Đức",
     logoText: "VIỆT ĐỨC",
     tagline: "Bền vững mọi công trình",
+    image: "/images/steel_construction.jpg",
     description: "Thương hiệu thép xây dựng uy tín đáp ứng tiêu chuẩn khắt khe nhất."
   },
   {
@@ -345,6 +351,7 @@ export const BRANDS: Brand[] = [
     name: "Thép VAS (Nghi Sơn)",
     logoText: "VAS",
     tagline: "Vững vàng tâm thép",
+    image: "/images/steel_construction.jpg",
     description: "Tập đoàn thép VAS với công nghệ luyện kim chuẩn châu Âu."
   },
   {
@@ -352,6 +359,7 @@ export const BRANDS: Brand[] = [
     name: "Nhôm Trường Thành",
     logoText: "TRƯỜNG THÀNH",
     tagline: "Phân phối độc quyền Hưng Vinh Phát",
+    image: "/images/roofing_aluminum.jpg",
     isStrategicPartner: true,
     description: "Sản phẩm nhôm định hình chất lượng vượt trội, phân phối độc quyền bởi Hưng Vinh Phát."
   },
@@ -360,6 +368,7 @@ export const BRANDS: Brand[] = [
     name: "Tôn Olympic",
     logoText: "OLYMPIC",
     tagline: "Độ bền vượt thời gian",
+    image: "/images/roofing_aluminum.jpg",
     description: "Dòng tôn lợp mái cao cấp kháng thời tiết tối ưu."
   },
   {
@@ -367,6 +376,7 @@ export const BRANDS: Brand[] = [
     name: "Gạch Lustra India",
     logoText: "LUSTRA",
     tagline: "Gạch men cao cấp nhập khẩu Ấn Độ",
+    image: "/images/ceramic_tiles.jpg",
     description: "Dòng gạch porcelain cẩm thạch nhập khẩu cao cấp trực tiếp từ Ấn Độ."
   },
   {
@@ -374,6 +384,7 @@ export const BRANDS: Brand[] = [
     name: "Gạch Lustile",
     logoText: "LUSTILE",
     tagline: "Hoa Sen phân phối độc quyền",
+    image: "/images/ceramic_tiles.jpg",
     isStrategicPartner: true,
     description: "Dòng gạch ốp lát nội địa chất lượng cao thuộc hệ thống Hoa Sen."
   },
@@ -382,6 +393,7 @@ export const BRANDS: Brand[] = [
     name: "Thiết bị vệ sinh Tuslo",
     logoText: "TUSLO",
     tagline: "Hoa Sen phân phối độc quyền",
+    image: "/images/sanitary_ware.jpg",
     isStrategicPartner: true,
     description: "Thiết bị phòng tắm cao cấp được Hoa Sen phân phối độc quyền."
   },
@@ -390,6 +402,7 @@ export const BRANDS: Brand[] = [
     name: "Nhựa Ngân Hoa",
     logoText: "NGÂN HOA",
     tagline: "Giải pháp trang trí nội thất",
+    image: "/images/plastic_panel.jpg",
     description: "Thương hiệu nhựa ốp tường và phào chỉ trang trí hàng đầu."
   }
 ];

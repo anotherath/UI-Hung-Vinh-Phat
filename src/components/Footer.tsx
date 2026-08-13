@@ -1,8 +1,13 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { COMPANY_INFO } from "@/data/companyData";
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/admin")) return null;
   return (
     <footer>
       <div className="container foot">

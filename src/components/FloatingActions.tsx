@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { COMPANY_INFO } from "@/data/companyData";
 import { MessageCircle } from "lucide-react";
 
 export default function FloatingActions() {
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted || pathname?.startsWith("/admin")) return null;
 
   return (
     <>
