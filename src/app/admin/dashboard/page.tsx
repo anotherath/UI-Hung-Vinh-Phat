@@ -1216,14 +1216,15 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
+                  {/* Hàng 2: Ảnh đại diện ngành hàng */}
                   <div style={{ marginBottom: "14px" }}>
                     <label style={{ display: "block", fontSize: "12.5px", color: "rgba(255,255,255,0.85)", marginBottom: "5px", fontWeight: 500 }}>
                       Ảnh đại diện ngành hàng <span style={{ color: "#f43f5e" }}>*</span>
                     </label>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                       <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 14px", background: "rgba(198, 161, 91, 0.15)", border: "1px dashed #c6a15b", borderRadius: "6px", color: "#c6a15b", fontSize: "12.5px", cursor: "pointer", fontWeight: 600 }}>
                         <Upload size={14} />
-                        <span>Chọn ảnh đại diện</span>
+                        <span>Chọn ảnh từ máy tính</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -1231,16 +1232,27 @@ export default function AdminDashboardPage() {
                           style={{ display: "none" }}
                         />
                       </label>
-                      {catImage ? (
-                        <div style={{ width: "40px", height: "40px", borderRadius: "6px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.2)" }}>
-                          <img src={catImage} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        </div>
-                      ) : (
-                        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
-                          Chưa chọn ảnh nào
-                        </span>
-                      )}
+                      <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
+                        {catImage ? "Đã chọn 1 ảnh đại diện" : "Chưa chọn ảnh nào (sẽ dùng ảnh mặc định)"}
+                      </span>
                     </div>
+
+                    {/* Xem trước ảnh kèm nút X xóa */}
+                    {catImage && (
+                      <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
+                        <div style={{ position: "relative", width: "64px", height: "64px", borderRadius: "6px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.2)" }}>
+                          <img src={catImage} alt="Ảnh ngành hàng" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <button
+                            type="button"
+                            onClick={() => setCatImage("")}
+                            style={{ position: "absolute", top: "2px", right: "2px", width: "18px", height: "18px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.9)", color: "#fff", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
+                            title="Xóa ảnh này"
+                          >
+                            <X size={11} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ marginBottom: "18px" }}>
@@ -1462,14 +1474,15 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
+                  {/* Hàng 2: Logo thương hiệu */}
                   <div style={{ marginBottom: "14px" }}>
                     <label style={{ display: "block", fontSize: "12.5px", color: "rgba(255,255,255,0.85)", marginBottom: "5px", fontWeight: 500 }}>
                       Logo thương hiệu <span style={{ color: "#f43f5e" }}>*</span>
                     </label>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                       <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 14px", background: "rgba(198, 161, 91, 0.15)", border: "1px dashed #c6a15b", borderRadius: "6px", color: "#c6a15b", fontSize: "12.5px", cursor: "pointer", fontWeight: 600 }}>
                         <Upload size={14} />
-                        <span>Chọn logo thương hiệu</span>
+                        <span>Chọn logo từ máy tính</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -1477,16 +1490,27 @@ export default function AdminDashboardPage() {
                           style={{ display: "none" }}
                         />
                       </label>
-                      {brandLogo ? (
-                        <div style={{ width: "40px", height: "40px", borderRadius: "6px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.2)" }}>
-                          <img src={brandLogo} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        </div>
-                      ) : (
-                        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
-                          Chưa chọn ảnh nào
-                        </span>
-                      )}
+                      <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
+                        {brandLogo ? "Đã chọn 1 logo" : "Chưa chọn ảnh nào (sẽ dùng logo mặc định)"}
+                      </span>
                     </div>
+
+                    {/* Xem trước logo kèm nút X xóa */}
+                    {brandLogo && (
+                      <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
+                        <div style={{ position: "relative", width: "64px", height: "64px", borderRadius: "6px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.2)", background: "#0a1714", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <img src={brandLogo} alt="Logo thương hiệu" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <button
+                            type="button"
+                            onClick={() => setBrandLogo("")}
+                            style={{ position: "absolute", top: "2px", right: "2px", width: "18px", height: "18px", borderRadius: "50%", background: "rgba(239, 68, 68, 0.9)", color: "#fff", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
+                            title="Xóa logo này"
+                          >
+                            <X size={11} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ marginBottom: "18px" }}>
