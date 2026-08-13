@@ -439,29 +439,41 @@ export default function AdminDashboardPage() {
     setAboutImage(objectUrl);
   };
 
-  // Toggle chọn hiển thị danh mục trên trang chủ
+  // Toggle chọn hiển thị danh mục trên trang chủ (tối đa 8 cái)
   const handleToggleHomeCategory = (slug: string) => {
     if (selectedHomeCatSlugs.includes(slug)) {
       setSelectedHomeCatSlugs(selectedHomeCatSlugs.filter((s) => s !== slug));
     } else {
+      if (selectedHomeCatSlugs.length >= 8) {
+        showNotification("Mục Danh mục chỉ được chọn tối đa 8 ngành hàng.");
+        return;
+      }
       setSelectedHomeCatSlugs([...selectedHomeCatSlugs, slug]);
     }
   };
 
-  // Toggle chọn hiển thị sản phẩm trên trang chủ
+  // Toggle chọn hiển thị sản phẩm trên trang chủ (tối đa 8 cái)
   const handleToggleHomeProduct = (id: string) => {
     if (selectedHomeProductIds.includes(id)) {
       setSelectedHomeProductIds(selectedHomeProductIds.filter((pid) => pid !== id));
     } else {
+      if (selectedHomeProductIds.length >= 8) {
+        showNotification("Mục Sản phẩm chỉ được chọn tối đa 8 sản phẩm.");
+        return;
+      }
       setSelectedHomeProductIds([...selectedHomeProductIds, id]);
     }
   };
 
-  // Toggle chọn hiển thị thương hiệu ở showroom
+  // Toggle chọn hiển thị thương hiệu ở showroom (tối đa 16 cái)
   const handleToggleHomeBrand = (slug: string) => {
     if (selectedHomeBrandSlugs.includes(slug)) {
       setSelectedHomeBrandSlugs(selectedHomeBrandSlugs.filter((s) => s !== slug));
     } else {
+      if (selectedHomeBrandSlugs.length >= 16) {
+        showNotification("Mục Showroom chỉ được chọn tối đa 16 thương hiệu.");
+        return;
+      }
       setSelectedHomeBrandSlugs([...selectedHomeBrandSlugs, slug]);
     }
   };
@@ -1930,9 +1942,6 @@ export default function AdminDashboardPage() {
                       style={{ display: "none" }}
                     />
                   </label>
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
-                    {heroImage ? "Đã chọn ảnh banner Hero" : "Chưa có ảnh"}
-                  </span>
                 </div>
 
                 {heroImage && (
@@ -1960,17 +1969,17 @@ export default function AdminDashboardPage() {
                       2. Section DANH MỤC (Giải pháp vật liệu toàn diện)
                     </h4>
                     <div style={{ fontSize: "12.5px", color: "rgba(255,255,255,0.6)" }}>
-                      Từ phần thô đến hoàn thiện, lựa chọn phù hợp cho từng công trình • Chọn các ngành hàng sẽ hiển thị ({selectedHomeCatSlugs.length}/{categoriesList.length})
+                      Từ phần thô đến hoàn thiện, lựa chọn phù hợp cho từng công trình • Chọn tối đa 8 ngành hàng ({selectedHomeCatSlugs.length}/8)
                     </div>
                   </div>
 
                   <div style={{ display: "flex", gap: "8px" }}>
                     <button
                       type="button"
-                      onClick={() => setSelectedHomeCatSlugs(categoriesList.map((c) => c.slug))}
+                      onClick={() => setSelectedHomeCatSlugs(categoriesList.slice(0, 8).map((c) => c.slug))}
                       style={{ padding: "4px 10px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "4px", color: "#fff", fontSize: "11.5px", cursor: "pointer" }}
                     >
-                      Chọn tất cả
+                      Chọn tối đa 8 mục
                     </button>
                     <button
                       type="button"
@@ -2027,17 +2036,17 @@ export default function AdminDashboardPage() {
                       3. Section DANH MỤC SẢN PHẨM (Vật liệu xây dựng & thiết bị)
                     </h4>
                     <div style={{ fontSize: "12.5px", color: "rgba(255,255,255,0.6)" }}>
-                      Hưng Vinh Phát cung cấp đa dạng vật liệu và thiết bị cho mọi công trình • Chọn các sản phẩm sẽ hiển thị ({selectedHomeProductIds.length}/{products.length})
+                      Hưng Vinh Phát cung cấp đa dạng vật liệu và thiết bị cho mọi công trình • Chọn tối đa 8 sản phẩm ({selectedHomeProductIds.length}/8)
                     </div>
                   </div>
 
                   <div style={{ display: "flex", gap: "8px" }}>
                     <button
                       type="button"
-                      onClick={() => setSelectedHomeProductIds(products.map((p) => p.id))}
+                      onClick={() => setSelectedHomeProductIds(products.slice(0, 8).map((p) => p.id))}
                       style={{ padding: "4px 10px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "4px", color: "#fff", fontSize: "11.5px", cursor: "pointer" }}
                     >
-                      Chọn tất cả
+                      Chọn tối đa 8 mục
                     </button>
                     <button
                       type="button"
@@ -2099,17 +2108,17 @@ export default function AdminDashboardPage() {
                       4. Section SHOWROOM ONLINE (Chọn thương hiệu để xem sản phẩm)
                     </h4>
                     <div style={{ fontSize: "12.5px", color: "rgba(255,255,255,0.6)" }}>
-                      Bấm vào từng thương hiệu để mở danh sách sản phẩm tương ứng • Chọn các thương hiệu sẽ xuất hiện ({selectedHomeBrandSlugs.length}/{brandsList.length})
+                      Bấm vào từng thương hiệu để mở danh sách sản phẩm tương ứng • Chọn tối đa 16 thương hiệu ({selectedHomeBrandSlugs.length}/16)
                     </div>
                   </div>
 
                   <div style={{ display: "flex", gap: "8px" }}>
                     <button
                       type="button"
-                      onClick={() => setSelectedHomeBrandSlugs(brandsList.map((b) => b.slug))}
+                      onClick={() => setSelectedHomeBrandSlugs(brandsList.slice(0, 16).map((b) => b.slug))}
                       style={{ padding: "4px 10px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "4px", color: "#fff", fontSize: "11.5px", cursor: "pointer" }}
                     >
-                      Chọn tất cả
+                      Chọn tối đa 16 mục
                     </button>
                     <button
                       type="button"
@@ -2180,9 +2189,6 @@ export default function AdminDashboardPage() {
                       style={{ display: "none" }}
                     />
                   </label>
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
-                    {aboutImage ? "Đã chọn ảnh giới thiệu doanh nghiệp" : "Chưa có ảnh"}
-                  </span>
                 </div>
 
                 {aboutImage && (
