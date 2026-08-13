@@ -1897,38 +1897,14 @@ export default function AdminDashboardPage() {
         {/* TAB 5: TÙY CHỈNH GIAO DIỆN WEB */}
         {activeTab === "customization" && (
           <div>
-            {/* Header + Nút Lưu */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px", gap: "12px", flexWrap: "wrap", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "14px" }}>
-              <div>
-                <h3 style={{ fontSize: "17px", fontWeight: 700, color: "#fff", margin: "0 0 4px" }}>
-                  Tùy Chỉnh Giao Diện Trang Chủ
-                </h3>
-                <div style={{ fontSize: "12.5px", color: "rgba(255,255,255,0.5)" }}>
-                  Cấu hình ảnh banner và lựa chọn các mục hiển thị trên từng section của website
-                </div>
+            {/* Header */}
+            <div style={{ marginBottom: "22px", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "14px" }}>
+              <h3 style={{ fontSize: "17px", fontWeight: 700, color: "#fff", margin: "0 0 4px" }}>
+                Tùy Chỉnh Giao Diện Trang Chủ
+              </h3>
+              <div style={{ fontSize: "12.5px", color: "rgba(255,255,255,0.5)" }}>
+                Cấu hình ảnh banner và lựa chọn các mục hiển thị trên từng section của website
               </div>
-
-              <button
-                type="button"
-                onClick={handleSaveCustomization}
-                style={{
-                  padding: "9px 20px",
-                  background: "linear-gradient(135deg, #c6a15b 0%, #d4b472 100%)",
-                  color: "#0a1714",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "13.5px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  boxShadow: "0 4px 12px rgba(198, 161, 91, 0.3)"
-                }}
-              >
-                <Save size={15} />
-                <span>Lưu Cấu Hình Giao Diện</span>
-              </button>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
