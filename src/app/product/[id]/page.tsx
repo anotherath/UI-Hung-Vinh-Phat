@@ -4,42 +4,148 @@ import React, { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SAMPLE_PRODUCTS } from "@/data/companyData";
+import { pb, getPbImageUrl, PbProductRecord } from "@/lib/pocketbase";
 import ProductCard from "@/components/ProductCard";
-import { CheckCircle2, ZoomIn, X, ChevronLeft, ChevronRight } from "lucide-react";
-
+import { CheckCircle2, ZoomIn, X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
 
+interface ProductDetailItem {
+  id: string;
+  name: string;
+  slug: string;
+  categorySlug: string;
+  categoryName: string;
+  brand: string;
+  price: string;
+  unit: string;
+  image: string;
+  images: string[];
+  description: string;
+}
+
 export default function ProductDetailPage({ params }: ProductPageProps) {
   const { id } = use(params);
 
-  // Find product by id
-  const product = SAMPLE_PRODUCTS.find((p) => p.id === id || p.id.toLowerCase() === id.toLowerCase());
+  const [product, setProduct] = useState<ProductDetailItem | null>(null);
+  const [allProducts, setAllProducts] = useState<ProductDetailItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (!product) {
-    notFound();
-  }
-
-  // Gallery images list (Main image + variations/specs)
-  const galleryImages = [
-    product.image,
-    "/images/hero_bright_architecture.jpg",
-    "/images/steel_construction.jpg",
-    "/images/roofing_aluminum.jpg"
-  ];
-
-  const [activeImg, setActiveImg] = useState(galleryImages[0]);
+  const [activeImg, setActiveImg] = useState<string>("/images/steel_construction.jpg");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
-  const currentIdx = galleryImages.indexOf(activeImg);
+  const validatePhone = (inputPhone: string): boolean => {
+    const clean = inputPhone.replace(/[\s.-]/g, "");
+    // Hỗ trợ cả di động (10 số: 03x, 05x, 07x, 08x, 09x) và máy bàn cố định (10-11 số: 02x)
+    const regex = /^(0|\+84)((3|5|7|8|9)[0-9]{8}|2[0-9]{8,9})$/;
+    return regex.test(clean);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setPhone(val);
+    if (phoneError && validatePhone(val)) {
+      setPhoneError("");
+    }
+  };
+
+  // Load product from PocketBase
+  useEffect(() => {
+    async function fetchProduct() {
+      try {
+        const records = await pb.collection("products").getFullList<PbProductRecord>({
+          requestKey: null
+        });
+
+        if (records && records.length > 0) {
+          const mapped: ProductDetailItem[] = records.map((p) => {
+            const productImages = (p.images || []).map((img) => getPbImageUrl("products", p.id, img)).filter(Boolean);
+            const mainImg = productImages[0] || "/images/steel_construction.jpg";
+            return {
+              id: p.id,
+              name: p.name,
+              slug: p.slug || p.id,
+              categorySlug: p.categorySlug,
+              categoryName: p.categoryName || p.categorySlug,
+              brand: p.brand,
+              price: p.price,
+              unit: p.unit,
+              image: mainImg,
+              images: productImages.length > 0 ? productImages : [mainImg],
+              description: p.description || ""
+            };
+          });
+
+          setAllProducts(mapped);
+          const found = mapped.find(
+            (p) => p.slug === id || p.id === id || p.slug.toLowerCase() === id.toLowerCase()
+          );
+
+          if (found) {
+            setProduct(found);
+            setActiveImg(found.images[0] || found.image);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Lỗi tải chi tiết sản phẩm từ PocketBase:", err);
+      }
+
+      // Fallback
+      const fallbackList: ProductDetailItem[] = SAMPLE_PRODUCTS.map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.id,
+        categorySlug: p.categorySlug,
+        categoryName: p.categoryName,
+        brand: p.brand,
+        price: p.price,
+        unit: p.unit,
+        image: p.image || "/images/steel_construction.jpg",
+        images: [p.image || "/images/steel_construction.jpg"],
+        description: p.description
+      }));
+
+      setAllProducts(fallbackList);
+      const fallbackFound = fallbackList.find(
+        (p) => p.slug === id || p.id === id || p.slug.toLowerCase() === id.toLowerCase()
+      );
+
+      if (fallbackFound) {
+        setProduct(fallbackFound);
+        setActiveImg(fallbackFound.images[0] || fallbackFound.image);
+      }
+      setIsLoading(false);
+    }
+
+    fetchProduct();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div style={{ minHeight: "70vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+        <Loader2 size={32} color="#c6a15b" className="animate-spin" style={{ animation: "spin 1s linear infinite" }} />
+        <div style={{ fontSize: "14px", color: "#66726d" }}>Đang tải thông tin sản phẩm...</div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    notFound();
+  }
+
+  const galleryImages = product.images.length > 0 ? product.images : [product.image];
+  const currentIdx = Math.max(0, galleryImages.indexOf(activeImg));
 
   const handlePrevImage = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -53,39 +159,50 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
     setActiveImg(galleryImages[nextIdx]);
   };
 
-  // Keyboard navigation for Lightbox
-  useEffect(() => {
-    if (!isLightboxOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        handlePrevImage();
-      } else if (e.key === "ArrowRight") {
-        handleNextImage();
-      } else if (e.key === "Escape") {
-        setIsLightboxOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isLightboxOpen, currentIdx]);
-
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!fullName.trim()) return;
+
+    if (!validatePhone(phone)) {
+      setPhoneError("Vui lòng nhập số điện thoại hợp lệ (di động hoặc số cố định).");
+      return;
+    }
+    setPhoneError("");
+
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const now = new Date();
+      const formattedDate = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+      await pb.collection("quotes").create({
+        customer: fullName.trim(),
+        phone: phone.trim(),
+        items: `${product.name} (${product.price} đ/${product.unit})`,
+        note: note.trim() || `Yêu cầu tư vấn sản phẩm ${product.name}`,
+        status: "Chưa xử lý",
+        date: formattedDate
+      });
       setSubmitSuccess(true);
-    }, 400);
+    } catch (err: any) {
+      console.error("Lỗi gửi yêu cầu báo giá:", err);
+      setSubmitSuccess(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Related products
-  const relatedProducts = SAMPLE_PRODUCTS.filter(
-    (p) => p.categorySlug === product.categorySlug && p.id !== product.id
-  ).slice(0, 4);
+  const relatedProducts = allProducts
+    .filter((p) => p.categorySlug === product.categorySlug && p.id !== product.id && p.slug !== product.slug)
+    .slice(0, 4);
 
-  const displayRelated = relatedProducts.length >= 4 
-    ? relatedProducts 
-    : [...relatedProducts, ...SAMPLE_PRODUCTS.filter(p => p.id !== product.id && !relatedProducts.includes(p))].slice(0, 4);
+  const displayRelated =
+    relatedProducts.length >= 4
+      ? relatedProducts
+      : [
+          ...relatedProducts,
+          ...allProducts.filter((p) => p.id !== product.id && p.slug !== product.slug && !relatedProducts.includes(p))
+        ].slice(0, 4);
 
   return (
     <div style={{ backgroundColor: "#ffffff", paddingBottom: "5rem" }}>
@@ -93,14 +210,13 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
       <Breadcrumb
         style={{ padding: "28px 0 28px" }}
         items={[
-          { label: "Danh mục sản phẩm", href: "/categories" },
+          { label: "Tất cả sản phẩm", href: "/products" },
           { label: product.categoryName, href: `/category/${product.categorySlug}` },
           { label: product.name }
         ]}
       />
 
       <div className="container">
-        
         {/* MAIN PRODUCT SHOWCASE (2-COLUMN GRID) */}
         <div
           style={{
@@ -112,7 +228,6 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
           }}
           className="product-detail-grid"
         >
-          
           {/* LEFT COLUMN: PRODUCT IMAGE GALLERY WITH CLICK-TO-ZOOM */}
           <div>
             {/* Main Featured Photo - Click to Open Lightbox */}
@@ -144,7 +259,6 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
                   transition: "all 0.3s ease"
                 }}
               />
-              {/* Zoom hint badge */}
               <div
                 style={{
                   position: "absolute",
@@ -168,28 +282,30 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
             </div>
 
             {/* Thumbnail Gallery Row */}
-            <div style={{ display: "flex", gap: "12px", overflowX: "auto", marginBottom: "28px" }}>
-              {galleryImages.map((imgUrl, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveImg(imgUrl)}
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    border: activeImg === imgUrl ? "2px solid var(--green)" : "1px solid #e2e8e4",
-                    padding: 0,
-                    cursor: "pointer",
-                    background: "#f7f9f8",
-                    opacity: activeImg === imgUrl ? 1 : 0.7,
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  <img src={imgUrl} alt={`Thumbnail ${idx}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </button>
-              ))}
-            </div>
+            {galleryImages.length > 1 && (
+              <div style={{ display: "flex", gap: "12px", overflowX: "auto", marginBottom: "28px" }}>
+                {galleryImages.map((imgUrl, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImg(imgUrl)}
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      border: activeImg === imgUrl ? "2px solid var(--green)" : "1px solid #e2e8e4",
+                      padding: 0,
+                      cursor: "pointer",
+                      background: "#f7f9f8",
+                      opacity: activeImg === imgUrl ? 1 : 0.7,
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <img src={imgUrl} alt={`Thumbnail ${idx}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* UNBOXED DESCRIPTION PARAGRAPH */}
             <div>
@@ -197,7 +313,7 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
                 MÔ TẢ SẢN PHẨM
               </h3>
               <p style={{ fontSize: "15px", color: "#4a5550", lineHeight: 1.7, margin: 0, fontWeight: 400 }}>
-                {product.description}
+                {product.description || "Sản phẩm chất lượng cao phân phối chính hãng bởi Hưng Vinh Phát kèm chứng nhận CO/CQ rõ ràng."}
               </p>
             </div>
           </div>
@@ -205,17 +321,14 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
           {/* RIGHT COLUMN: PRODUCT INFO & PERFECTLY ALIGNED CONSULTATION FORM */}
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
-              {/* Brand Name & Category Type */}
               <div style={{ fontSize: "12px", color: "var(--gold)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "2px", marginBottom: "6px" }}>
                 THƯƠNG HIỆU: {product.brand} • LOẠI: {product.categoryName}
               </div>
 
-              {/* Product Name H1 */}
               <h1 style={{ fontSize: "32px", fontWeight: 800, color: "#111111", margin: "0 0 16px", lineHeight: 1.25, letterSpacing: "-0.5px" }}>
                 {product.name}
               </h1>
 
-              {/* Price & Stock Line */}
               <div
                 style={{
                   padding: "16px 0",
@@ -239,7 +352,7 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
               </div>
             </div>
 
-            {/* PERFECTLY ALIGNED BORDERLESS CONSULTATION FORM */}
+            {/* CONSULTATION FORM */}
             <div style={{ marginTop: "8px" }}>
               <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--dark)", marginBottom: "6px", letterSpacing: "-0.3px" }}>
                 Liên Hệ Tư Vấn & Đặt Hàng Trực Tiếp
@@ -249,13 +362,11 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
               </p>
 
               {submitSuccess ? (
-                <div style={{ background: "#e8f5e9", border: "1px solid #c8e6c9", color: "#2e7d32", padding: "18px", borderRadius: "10px", textAlign: "center", fontSize: "14.5px", fontWeight: 600 }}>
-                  <CheckCircle2 size={26} color="#2e7d32" style={{ margin: "0 auto 8px" }} />
+                <div style={{ background: "#e8f5e9", border: "1px solid #c8e6c9", color: "#2e7d32", padding: "18px 20px", borderRadius: "10px", textAlign: "center", fontSize: "14.5px", fontWeight: 500, lineHeight: 1.6 }}>
                   Cảm ơn bạn {fullName}! Hưng Vinh Phát đã nhận thông tin và sẽ liên hệ hỗ trợ tư vấn đặt hàng ngay qua SĐT {phone}.
                 </div>
               ) : (
                 <form onSubmit={handleFormSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {/* Side-by-side Input Grid */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                     <div>
                       <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#222", marginBottom: "6px" }}>
@@ -275,8 +386,7 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
                           fontSize: "14px",
                           outline: "none",
                           boxSizing: "border-box",
-                          backgroundColor: "#fcfdfe",
-                          transition: "all 0.2s ease"
+                          backgroundColor: "#fcfdfe"
                         }}
                       />
                     </div>
@@ -289,24 +399,27 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
                         type="tel"
                         required
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="Nhập số điện thoại..."
+                        onChange={handlePhoneChange}
+                        placeholder="Ví dụ: 0912 345 678"
                         style={{
                           width: "100%",
                           padding: "12px 16px",
                           borderRadius: "8px",
-                          border: "1px solid #d0d7d3",
+                          border: phoneError ? "1px solid #ef4444" : "1px solid #d0d7d3",
                           fontSize: "14px",
                           outline: "none",
                           boxSizing: "border-box",
-                          backgroundColor: "#fcfdfe",
-                          transition: "all 0.2s ease"
+                          backgroundColor: "#fcfdfe"
                         }}
                       />
+                      {phoneError && (
+                        <div style={{ color: "#ef4444", fontSize: "12px", marginTop: "5px", fontWeight: 500 }}>
+                          {phoneError}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Note / Special Requirements Textarea */}
                   <div>
                     <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#222", marginBottom: "6px" }}>
                       Ghi chú / Nhu cầu chi tiết (nếu có)
@@ -327,13 +440,11 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
                         boxSizing: "border-box",
                         backgroundColor: "#fcfdfe",
                         fontFamily: "inherit",
-                        resize: "none",
-                        transition: "all 0.2s ease"
+                        resize: "none"
                       }}
                     />
                   </div>
 
-                  {/* Metallic Gold Order Submit CTA Button */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -360,40 +471,39 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
                 </form>
               )}
             </div>
-
           </div>
-
         </div>
 
         {/* RELATED PRODUCTS */}
-        <div style={{ borderTop: "1px solid #eaeaea", paddingTop: "40px" }}>
-          <div style={{ textAlign: "left", marginBottom: "24px" }}>
-            <div className="eyebrow" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "2.5px", color: "var(--gold)" }}>
-              DANH MỤC {product.categoryName.toUpperCase()}
+        {displayRelated.length > 0 && (
+          <div style={{ borderTop: "1px solid #eaeaea", paddingTop: "40px" }}>
+            <div style={{ textAlign: "left", marginBottom: "24px" }}>
+              <div className="eyebrow" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "2.5px", color: "var(--gold)" }}>
+                DANH MỤC {product.categoryName.toUpperCase()}
+              </div>
+              <h2 style={{ fontSize: "24px", fontWeight: 700, color: "var(--dark)", margin: "6px 0 0" }}>
+                Sản phẩm cùng loại bạn có thể quan tâm
+              </h2>
             </div>
-            <h2 style={{ fontSize: "24px", fontWeight: 700, color: "var(--dark)", margin: "6px 0 0" }}>
-              Sản phẩm cùng loại bạn có thể quan tâm
-            </h2>
-          </div>
 
-          <div className="products">
-            {displayRelated.map((rel) => (
-              <ProductCard
-                key={rel.id}
-                image={rel.image}
-                name={rel.name}
-                priceText={`${rel.price} đ/${rel.unit}`}
-                description={rel.description}
-                buttonText="Xem chi tiết"
-                detailUrl={`/product/${rel.id}`}
-              />
-            ))}
+            <div className="products">
+              {displayRelated.map((rel) => (
+                <ProductCard
+                  key={rel.id || rel.slug}
+                  image={rel.image}
+                  name={rel.name}
+                  priceText={`${rel.price} đ/${rel.unit}`}
+                  description={rel.description}
+                  buttonText="Xem chi tiết"
+                  detailUrl={`/product/${rel.slug || rel.id}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-
+        )}
       </div>
 
-      {/* FULLSCREEN LIGHTBOX PHOTO VIEWER WITH LEFT/RIGHT NAVIGATION */}
+      {/* FULLSCREEN LIGHTBOX */}
       {isLightboxOpen && (
         <div
           onClick={() => setIsLightboxOpen(false)}
@@ -413,7 +523,6 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
             cursor: "default"
           }}
         >
-          {/* Close Button */}
           <button
             onClick={() => setIsLightboxOpen(false)}
             style={{
@@ -430,69 +539,65 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              zIndex: 10001,
-              transition: "all 0.2s ease"
+              zIndex: 10001
             }}
             aria-label="Đóng xem ảnh"
           >
             <X size={24} />
           </button>
 
-          {/* Left Arrow Button */}
-          <button
-            onClick={handlePrevImage}
-            style={{
-              position: "absolute",
-              left: "24px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              background: "rgba(255, 255, 255, 0.2)",
-              border: "none",
-              color: "#ffffff",
-              width: "48px",
-              height: "48px",
-              borderRadius: "50%",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 10001,
-              transition: "all 0.2s ease"
-            }}
-            aria-label="Xem ảnh trước"
-            title="Ảnh trước (Trái)"
-          >
-            <ChevronLeft size={28} />
-          </button>
+          {galleryImages.length > 1 && (
+            <>
+              <button
+                onClick={handlePrevImage}
+                style={{
+                  position: "absolute",
+                  left: "24px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "rgba(255, 255, 255, 0.2)",
+                  border: "none",
+                  color: "#ffffff",
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 10001
+                }}
+                aria-label="Xem ảnh trước"
+              >
+                <ChevronLeft size={28} />
+              </button>
 
-          {/* Right Arrow Button */}
-          <button
-            onClick={handleNextImage}
-            style={{
-              position: "absolute",
-              right: "24px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              background: "rgba(255, 255, 255, 0.2)",
-              border: "none",
-              color: "#ffffff",
-              width: "48px",
-              height: "48px",
-              borderRadius: "50%",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 10001,
-              transition: "all 0.2s ease"
-            }}
-            aria-label="Xem ảnh kế tiếp"
-            title="Ảnh tiếp theo (Phải)"
-          >
-            <ChevronRight size={28} />
-          </button>
+              <button
+                onClick={handleNextImage}
+                style={{
+                  position: "absolute",
+                  right: "24px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "rgba(255, 255, 255, 0.2)",
+                  border: "none",
+                  color: "#ffffff",
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 10001
+                }}
+                aria-label="Xem ảnh kế tiếp"
+              >
+                <ChevronRight size={28} />
+              </button>
+            </>
+          )}
 
-          {/* Fullscreen Photo Showcase Container */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -514,8 +619,6 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
                 objectFit: "contain"
               }}
             />
-            
-            {/* Caption & Counter Bar */}
             <div
               style={{
                 position: "absolute",
@@ -540,7 +643,6 @@ export default function ProductDetailPage({ params }: ProductPageProps) {
           </div>
         </div>
       )}
-
     </div>
   );
 }

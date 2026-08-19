@@ -1,17 +1,34 @@
 "use client";
 
-import React, { useEffect, Suspense, useMemo } from "react";
+import React, { useEffect, useState, Suspense, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SAMPLE_PRODUCTS, COMPANY_INFO } from "@/data/companyData";
+import { pb, getPbImageUrl, PbProductRecord } from "@/lib/pocketbase";
 import ProductCard from "@/components/ProductCard";
-import { Phone, SearchX } from "lucide-react";
+import { Phone, SearchX, Loader2 } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
+
+interface DisplayProduct {
+  id: string;
+  name: string;
+  slug: string;
+  categorySlug: string;
+  categoryName: string;
+  brand: string;
+  price: string;
+  unit: string;
+  image: string;
+  description: string;
+}
 
 function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const categoryParam = searchParams.get("category");
   const qParam = searchParams.get("q");
+
+  const [products, setProducts] = useState<DisplayProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Auto-redirect /products?category=xxx to /category/xxx if category query is present
   useEffect(() => {
@@ -20,21 +37,83 @@ function ProductsContent() {
     }
   }, [categoryParam, router]);
 
+  // Load products from PocketBase
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const records = await pb.collection("products").getFullList<PbProductRecord>({
+          requestKey: null
+        });
+        if (records && records.length > 0) {
+          const mapped: DisplayProduct[] = records.map((p) => {
+            const firstImg =
+              p.images && p.images.length > 0
+                ? getPbImageUrl("products", p.id, p.images[0])
+                : "/images/steel_construction.jpg";
+            return {
+              id: p.id,
+              name: p.name,
+              slug: p.slug || p.id,
+              categorySlug: p.categorySlug,
+              categoryName: p.categoryName || p.categorySlug,
+              brand: p.brand,
+              price: p.price,
+              unit: p.unit,
+              image: firstImg,
+              description: p.description || ""
+            };
+          });
+          setProducts(mapped);
+          setIsLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.error("Lỗi tải sản phẩm từ PocketBase:", err);
+      }
+
+      // Fallback nếu không có database
+      const fallbackList: DisplayProduct[] = SAMPLE_PRODUCTS.map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.id,
+        categorySlug: p.categorySlug,
+        categoryName: p.categoryName,
+        brand: p.brand,
+        price: p.price,
+        unit: p.unit,
+        image: p.image || "/images/steel_construction.jpg",
+        description: p.description
+      }));
+      setProducts(fallbackList);
+      setIsLoading(false);
+    }
+
+    loadProducts();
+  }, []);
+
   // Filter products dynamically based on search term
   const filteredProducts = useMemo(() => {
-    if (!qParam || !qParam.trim()) return SAMPLE_PRODUCTS;
+    if (!qParam || !qParam.trim()) return products;
     const query = qParam.trim().toLowerCase();
-    return SAMPLE_PRODUCTS.filter((p) =>
-      p.name.toLowerCase().includes(query) ||
-      p.description.toLowerCase().includes(query) ||
-      p.brand.toLowerCase().includes(query) ||
-      p.categoryName.toLowerCase().includes(query) ||
-      p.features.some((f) => f.toLowerCase().includes(query)) ||
-      Object.values(p.specs).some((val) => val.toLowerCase().includes(query))
+    return products.filter((p) =>
+      (p.name || "").toLowerCase().includes(query) ||
+      (p.description || "").toLowerCase().includes(query) ||
+      (p.brand || "").toLowerCase().includes(query) ||
+      (p.categoryName || "").toLowerCase().includes(query) ||
+      (p.categorySlug || "").toLowerCase().includes(query)
     );
-  }, [qParam]);
+  }, [qParam, products]);
 
   const isSearchMode = Boolean(qParam && qParam.trim());
+
+  if (isLoading) {
+    return (
+      <div style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+        <Loader2 size={32} color="#c6a15b" className="animate-spin" style={{ animation: "spin 1s linear infinite" }} />
+        <div style={{ fontSize: "14px", color: "#66726d" }}>Đang tải danh sách sản phẩm...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh", paddingBottom: "5rem" }}>
@@ -77,7 +156,7 @@ function ProductsContent() {
           </div>
         </div>
 
-        {/* Products Grid or Ultra-Minimalist Empty Search State */}
+        {/* Products Grid or Minimalist Empty Search State */}
         {filteredProducts.length === 0 ? (
           <div
             style={{
@@ -87,10 +166,8 @@ function ProductsContent() {
               margin: "0 auto 40px"
             }}
           >
-            {/* Minimal Thin Icon */}
             <SearchX size={36} strokeWidth={1.25} style={{ color: "var(--gold)", marginBottom: "14px" }} />
 
-            {/* Title & Description */}
             <h3 style={{ fontSize: "20px", color: "var(--dark)", fontWeight: 500, marginBottom: "8px" }}>
               Không tìm thấy sản phẩm cho từ khóa <span style={{ color: "var(--green)", fontWeight: 500 }}>"{qParam}"</span>
             </h3>
@@ -98,7 +175,6 @@ function ProductsContent() {
               Bạn có thể thử tìm kiếm từ khóa khác (như <em>thép, tôn, gạch, bồn cầu...</em>) hoặc gọi điện trực tiếp cho tư vấn viên Hưng Vinh Phát.
             </p>
 
-            {/* Action Call Button */}
             <div>
               <a
                 href={`tel:${COMPANY_INFO.phoneRaw[0]}`}
@@ -124,12 +200,12 @@ function ProductsContent() {
           <div className="products">
             {filteredProducts.map((product) => (
               <ProductCard
-                key={product.id}
+                key={product.id || product.slug}
                 image={product.image}
                 name={product.name}
                 priceText={`${product.price} đ/${product.unit}`}
                 description={product.description}
-                detailUrl={`/product/${product.id}`}
+                detailUrl={`/product/${product.slug || product.id}`}
               />
             ))}
           </div>
@@ -141,7 +217,7 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div style={{ padding: "60px", textAlign: "center", color: "#66726d", fontWeight: 400 }}>Đang tải kết quả tìm kiếm...</div>}>
+    <Suspense fallback={<div style={{ padding: "60px", textAlign: "center", color: "#66726d", fontWeight: 400 }}>Đang tải danh sách sản phẩm...</div>}>
       <ProductsContent />
     </Suspense>
   );

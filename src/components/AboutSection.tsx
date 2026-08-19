@@ -1,18 +1,40 @@
 import React from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
-import { COMPANY_INFO } from "@/data/companyData";
+import {
+  pb,
+  getPbImageUrl,
+  PbSiteSettingsRecord
+} from "@/lib/pocketbase";
 
-export default function AboutSection() {
+async function getAboutImage(): Promise<string> {
+  try {
+    const settingsRes = await pb.collection("site_settings").getList<PbSiteSettingsRecord>(1, 1, {
+      filter: 'key = "homepage_customization"',
+      requestKey: null
+    });
+    const settings = settingsRes.items[0];
+    if (settings && settings.aboutImage) {
+      return getPbImageUrl("site_settings", settings.id, settings.aboutImage);
+    }
+  } catch (err) {
+    console.error("Lỗi tải ảnh Về Hưng Vinh Phát từ PocketBase:", err);
+  }
+  return "/images/hero_bright_architecture.jpg";
+}
+
+export default async function AboutSection() {
+  const aboutImageSrc = await getAboutImage();
+
   return (
     <section className="section about" id="about" style={{ background: "#fafbfa", padding: "72px 0" }}>
       <div className="container aboutgrid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "48px", alignItems: "center" }}>
-        
-        {/* Left Clean Image */}
-        <div style={{ borderRadius: "12px", overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.05)", height: "390px" }}>
+
+        {/* Left Dynamic Image from Settings */}
+        <div style={{ borderRadius: "12px", overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.05)", height: "390px", background: "#f0f4f2" }}>
           <img
-            src="/images/hero_bright_architecture.jpg"
-            alt="Nhà xưởng Hưng Vinh Phát"
+            src={aboutImageSrc}
+            alt="Hưng Vinh Phát - Đặt chất lượng công trình lên hàng đầu"
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </div>
@@ -77,7 +99,7 @@ export default function AboutSection() {
             <Link href="/about" className="btn primary" style={{ borderRadius: "5px", padding: "10px 18px", fontWeight: 500 }}>
               Tìm hiểu thêm về công ty
             </Link>
-            <Link href="/categories" className="btn" style={{ background: "transparent", color: "var(--green)", border: "1px solid var(--green)", borderRadius: "5px", padding: "10px 18px", fontWeight: 500 }}>
+            <Link href="/brands" className="btn" style={{ background: "transparent", color: "var(--green)", border: "1px solid var(--green)", borderRadius: "5px", padding: "10px 18px", fontWeight: 500 }}>
               Xem đối tác chiến lược
             </Link>
           </div>

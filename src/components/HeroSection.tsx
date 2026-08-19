@@ -1,19 +1,39 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { pb, getPbImageUrl, PbSiteSettingsRecord } from "@/lib/pocketbase";
 
-export default function HeroSection() {
+async function getHeroImage(): Promise<string> {
+  try {
+    const res = await pb.collection("site_settings").getList<PbSiteSettingsRecord>(1, 1, {
+      filter: 'key = "homepage_customization"',
+      requestKey: null
+    });
+    const record = res.items[0];
+    if (record && record.heroImage) {
+      return getPbImageUrl("site_settings", record.id, record.heroImage);
+    }
+  } catch (err) {
+    console.error("Lỗi lấy ảnh hero từ PocketBase:", err);
+  }
+  return "/images/hero_architecture.jpg";
+}
+
+export default async function HeroSection() {
+  const heroImageSrc = await getHeroImage();
+  const isRemote = heroImageSrc.startsWith("http");
+
   return (
     <section className="hero" id="home" style={{ position: "relative", overflow: "hidden" }}>
-      {/* Preloaded Local Hero Architecture Image */}
+      {/* Hero Architecture Image from Settings */}
       <Image
-        src="/images/hero_architecture.jpg"
+        src={heroImageSrc}
         alt="Hưng Vinh Phát - Vật liệu xây dựng & kiến trúc cao cấp"
         fill
         priority
         fetchPriority="high"
         sizes="100vw"
-        quality={88}
+        unoptimized={isRemote}
         style={{
           objectFit: "cover",
           objectPosition: "center",

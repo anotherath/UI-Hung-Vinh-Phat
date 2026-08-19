@@ -1,19 +1,36 @@
 "use client";
 
 import React from "react";
-import { ProductCategory, Product, COMPANY_INFO } from "@/data/companyData";
+import { COMPANY_INFO } from "@/data/companyData";
 import ProductCard from "@/components/ProductCard";
 import { Phone } from "lucide-react";
-
 import Breadcrumb from "@/components/Breadcrumb";
 
+export interface DisplayCategory {
+  id?: string;
+  name: string;
+  slug: string;
+  image: string;
+  description: string;
+}
+
+export interface DisplayCategoryProduct {
+  id: string;
+  name: string;
+  slug: string;
+  brand: string;
+  price: string;
+  unit: string;
+  image: string;
+  description: string;
+}
+
 interface CategoryDetailViewProps {
-  category: ProductCategory;
-  categoryProducts: Product[];
+  category: DisplayCategory;
+  categoryProducts: DisplayCategoryProduct[];
 }
 
 export default function CategoryDetailView({ category, categoryProducts }: CategoryDetailViewProps) {
-
   return (
     <div style={{ backgroundColor: "#fafafa", minHeight: "100vh", paddingBottom: "5rem" }}>
       {/* Minimal Category Header Banner */}
@@ -29,7 +46,7 @@ export default function CategoryDetailView({ category, categoryProducts }: Categ
       >
         <div className="container">
           <div className="eyebrow" style={{ color: "var(--gold)", fontSize: "11px", fontWeight: 600, letterSpacing: "2.5px" }}>
-            DANH MỤC SẢN PHẨM
+            DANH MỤC NGÀNH HÀNG
           </div>
           <h1 style={{ fontSize: "36px", color: "#fff", margin: "8px 0 12px", fontWeight: 700, lineHeight: 1.25 }}>
             {category.name}
@@ -43,14 +60,14 @@ export default function CategoryDetailView({ category, categoryProducts }: Categ
       {/* Breadcrumb Navigation Bar */}
       <Breadcrumb
         items={[
-          { label: "Danh mục sản phẩm", href: "/categories" },
+          { label: "Trang chủ", href: "/" },
+          { label: "Sản phẩm", href: "/products" },
           { label: category.name }
         ]}
       />
 
       {/* Main Products Catalogue Container */}
       <div className="container" style={{ paddingTop: "36px" }}>
-        
         {/* Subheader Info */}
         <div style={{ marginBottom: "24px", color: "#77827d", fontSize: "14.5px", fontWeight: 400 }}>
           Hiển thị <strong style={{ color: "var(--green)", fontWeight: 500 }}>{categoryProducts.length}</strong> sản phẩm phù hợp
@@ -78,17 +95,16 @@ export default function CategoryDetailView({ category, categoryProducts }: Categ
           <div className="products">
             {categoryProducts.map((product) => (
               <ProductCard
-                key={product.id}
+                key={product.id || product.slug}
                 image={product.image}
                 name={product.name}
                 priceText={`${product.price} đ/${product.unit}`}
                 description={product.description}
-                detailUrl={`/product/${product.id}`}
+                detailUrl={`/product/${product.slug || product.id}`}
               />
             ))}
           </div>
         )}
-
       </div>
     </div>
   );

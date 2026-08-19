@@ -7,6 +7,8 @@ import AboutSection from "@/components/AboutSection";
 import ShowroomSection from "@/components/ShowroomSection";
 import QuoteSection from "@/components/QuoteSection";
 
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   return (
     <>

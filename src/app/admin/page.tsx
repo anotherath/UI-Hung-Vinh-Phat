@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -12,8 +12,10 @@ import {
   ArrowRight,
   AlertCircle,
   KeyRound,
-  ArrowLeft
+  ArrowLeft,
+  Loader2
 } from "lucide-react";
+import { pb } from "@/lib/pocketbase";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -22,42 +24,53 @@ export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Kiểm tra nếu đã đăng nhập thì tự động chuyển hướng sang dashboard
+  useEffect(() => {
+    if (pb.authStore.isValid && pb.authStore.record?.collectionName === "_superusers") {
+      router.push("/admin/dashboard");
+    }
+  }, [router]);
+
   // Login handler
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
 
-    if (!username.trim() || !password.trim()) {
+    const cleanUsername = username.trim();
+    const cleanPassword = password.trim();
+
+    if (!cleanUsername || !cleanPassword) {
       setErrorMsg("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
       return;
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      if (password === "123456" || password.length >= 4) {
+    try {
+      // Đăng nhập Superuser qua PocketBase
+      const authData = await pb.collection("_superusers").authWithPassword(cleanUsername, cleanPassword);
+      if (authData && authData.token) {
         if (typeof window !== "undefined") {
           localStorage.setItem("hvp_admin_auth", "true");
         }
         router.push("/admin/dashboard");
       } else {
-        setErrorMsg("Mật khẩu không đúng (Mật khẩu dùng thử: 123456).");
+        setErrorMsg("Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.");
       }
-    }, 400);
-  };
-
-  const handleAutoFill = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
+    } catch (err: any) {
+      console.error("Lỗi đăng nhập PocketBase:", err);
+      if (err?.status === 400 || err?.message?.includes("Failed to authenticate")) {
+        setErrorMsg("Tài khoản hoặc mật khẩu không chính xác.");
+      } else if (err?.message) {
+        setErrorMsg(`Lỗi kết nối máy chủ: ${err.message}`);
+      } else {
+        setErrorMsg("Không thể kết nối đến máy chủ quản trị. Vui lòng thử lại sau.");
+      }
+    } finally {
+      setIsLoading(false);
     }
-    setUsername("admin@hungvinhphat.vn");
-    setPassword("123456");
-    setErrorMsg("");
   };
 
   return (
@@ -168,6 +181,7 @@ export default function AdminLoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="admin@hungvinhphat.vn"
+                  required
                   style={{
                     width: "100%",
                     padding: "11px 14px 11px 42px",
@@ -183,7 +197,7 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            <div style={{ marginBottom: "18px" }}>
+            <div style={{ marginBottom: "24px" }}>
               <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "rgba(255, 255, 255, 0.9)", marginBottom: "6px" }}>
                 Mật khẩu
               </label>
@@ -194,6 +208,7 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  required
                   style={{
                     width: "100%",
                     padding: "11px 42px 11px 42px",
@@ -216,29 +231,6 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", fontSize: "13px" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", color: "rgba(255, 255, 255, 0.8)" }}>
-                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: "#c6a15b" }} />
-                Ghi nhớ đăng nhập
-              </label>
-              <button
-                type="button"
-                onClick={handleAutoFill}
-                style={{
-                  background: "rgba(198, 161, 91, 0.15)",
-                  border: "1px solid rgba(198, 161, 91, 0.3)",
-                  color: "#c6a15b",
-                  padding: "4px 12px",
-                  borderRadius: "12px",
-                  fontSize: "11.5px",
-                  cursor: "pointer",
-                  fontWeight: 600
-                }}
-              >
-                ⚡ Điền nhanh admin
-              </button>
-            </div>
-
             <button
               type="submit"
               disabled={isLoading}
@@ -259,7 +251,17 @@ export default function AdminLoginPage() {
                 boxShadow: "0 6px 20px rgba(198, 161, 91, 0.3)"
               }}
             >
-              {isLoading ? <span>Đang xác thực...</span> : <><span>Đăng nhập Admin</span><ArrowRight size={18} /></>}
+              {isLoading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" style={{ animation: "spin 1s linear infinite" }} />
+                  <span>Đang xác thực...</span>
+                </>
+              ) : (
+                <>
+                  <span>Đăng nhập Admin</span>
+                  <ArrowRight size={18} />
+                </>
+              )}
             </button>
           </form>
 

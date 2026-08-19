@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Send, CheckCircle2, Phone, ShieldCheck } from "lucide-react";
 import { COMPANY_INFO, PRODUCT_CATEGORIES } from "@/data/companyData";
+import { pb } from "@/lib/pocketbase";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -15,11 +16,31 @@ export default function ContactForm() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) return;
-    setSubmitted(true);
+
+    setIsSubmitting(true);
+    try {
+      const now = new Date();
+      const formattedDate = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+      await pb.collection("quotes").create({
+        customer: formData.name.trim(),
+        phone: formData.phone.trim(),
+        items: formData.category ? `${formData.category}${formData.quantity ? ` - Số lượng: ${formData.quantity}` : ""}` : (formData.message || "Yêu cầu tư vấn"),
+        note: `Địa điểm: ${formData.location || "N/A"}. Ghi chú: ${formData.message || "N/A"}`,
+        status: "Chưa xử lý",
+        date: formattedDate
+      });
+    } catch (err) {
+      console.error("Lỗi gửi báo giá qua PocketBase:", err);
+    } finally {
+      setIsSubmitting(false);
+      setSubmitted(true);
+    }
   };
 
   return (

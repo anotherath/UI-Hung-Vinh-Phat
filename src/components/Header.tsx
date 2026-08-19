@@ -24,7 +24,7 @@ export default function Header() {
   const navLinks = [
     { href: "/", label: "Trang chủ" },
     { href: "/products", label: "Sản phẩm" },
-    { href: "/categories", label: "Thương hiệu" },
+    { href: "/brands", label: "Thương hiệu" },
     { href: "/about", label: "Về chúng tôi" },
   ];
 

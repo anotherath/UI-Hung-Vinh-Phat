@@ -1,12 +1,97 @@
 import React from "react";
 import Link from "next/link";
-import { COMPANY_INFO } from "@/data/companyData";
-import ProductCard from "@/components/ProductCard";
+import { COMPANY_INFO, PRODUCT_CATEGORIES } from "@/data/companyData";
+import {
+  pb,
+  getPbImageUrl,
+  PbSiteSettingsRecord,
+  PbCategoryRecord
+} from "@/lib/pocketbase";
 import { FileText, MapPin, Phone, Mail, Clock, BadgeCheck, Handshake, Truck, Award } from "lucide-react";
-
 import Breadcrumb from "@/components/Breadcrumb";
 
-export default function AboutPage() {
+export const dynamic = "force-dynamic";
+
+interface AboutCategoryItem {
+  id?: string;
+  name: string;
+  slug: string;
+  image: string;
+}
+
+async function getAboutImage(): Promise<string> {
+  try {
+    const settingsRes = await pb.collection("site_settings").getList<PbSiteSettingsRecord>(1, 1, {
+      filter: 'key = "homepage_customization"',
+      requestKey: null
+    });
+    const settings = settingsRes.items[0];
+    if (settings && settings.aboutImage) {
+      return getPbImageUrl("site_settings", settings.id, settings.aboutImage);
+    }
+  } catch (err) {
+    console.error("Lỗi tải ảnh Về Hưng Vinh Phát từ PocketBase:", err);
+  }
+  return "/images/hero_bright_architecture.jpg";
+}
+
+async function getAboutCategories(): Promise<AboutCategoryItem[]> {
+  try {
+    // 1. Lấy danh sách ngành hàng được chọn trong settings (Mục 2: Section DANH MỤC)
+    const settingsRes = await pb.collection("site_settings").getList<PbSiteSettingsRecord>(1, 1, {
+      filter: 'key = "homepage_customization"',
+      requestKey: null
+    });
+    const settings = settingsRes.items[0];
+    const selectedSlugs = settings?.selectedCategories || [];
+
+    // 2. Lấy toàn bộ ngành hàng từ PocketBase
+    const catRecords = await pb.collection("categories").getFullList<PbCategoryRecord>({
+      requestKey: null
+    });
+
+    if (catRecords && catRecords.length > 0) {
+      if (selectedSlugs.length > 0) {
+        const matched = selectedSlugs
+          .map((slug) => catRecords.find((c) => c.slug === slug))
+          .filter((c): c is PbCategoryRecord => Boolean(c))
+          .slice(0, 8)
+          .map((c) => ({
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            image: getPbImageUrl("categories", c.id, c.image) || "/images/steel_construction.jpg"
+          }));
+
+        if (matched.length > 0) {
+          return matched;
+        }
+      }
+
+      return catRecords.slice(0, 8).map((c) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        image: getPbImageUrl("categories", c.id, c.image) || "/images/steel_construction.jpg"
+      }));
+    }
+  } catch (err) {
+    console.error("Lỗi tải danh mục trong trang About từ PocketBase:", err);
+  }
+
+  return PRODUCT_CATEGORIES.slice(0, 8).map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    image: c.image || "/images/steel_construction.jpg"
+  }));
+}
+
+export default async function AboutPage() {
+  const [aboutImageSrc, categories] = await Promise.all([
+    getAboutImage(),
+    getAboutCategories()
+  ]);
+
   return (
     <div style={{ backgroundColor: "#ffffff", paddingBottom: "5rem" }}>
       {/* 1. Header Banner */}
@@ -29,13 +114,13 @@ export default function AboutPage() {
       <section style={{ padding: "56px 0", borderBottom: "1px solid #f0f2f0" }}>
         <div className="container">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1.15fr", gap: "48px", alignItems: "center" }} className="about-grid">
-            
-            {/* Image */}
+
+            {/* Dynamic Image from Site Settings */}
             <div style={{ position: "relative" }}>
-              <div className="about-hero-img" style={{ borderRadius: "12px", overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.05)", height: "400px" }}>
+              <div className="about-hero-img" style={{ borderRadius: "12px", overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.05)", height: "400px", background: "#f4f6f5" }}>
                 <img
-                  src="/images/hero_bright_architecture.jpg"
-                  alt="Trụ sở Hưng Vinh Phát"
+                  src={aboutImageSrc}
+                  alt="Trụ sở và nhà xưởng Hưng Vinh Phát"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </div>
@@ -84,12 +169,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 3. REFINED ELEGANT DUAL SHOWCASE: HỒ SƠ PHÁP LÝ & 4 TRỤ CỘT NĂNG LỰC */}
+      {/* 3. HỒ SƠ PHÁP LÝ & 4 TRỤ CỘT NĂNG LỰC */}
       <section style={{ padding: "60px 0", backgroundColor: "#fafafa" }}>
         <div className="container">
-          
+
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1.35fr", gap: "36px", alignItems: "stretch" }} className="about-grid">
-            
+
             {/* LEFT PANEL: Forest Green Corporate Specs */}
             <div
               style={{
@@ -149,9 +234,9 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* RIGHT PANEL: Redesigned High-End Core Values & Pillars */}
+            {/* RIGHT PANEL: Core Values & Pillars */}
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              
+
               {/* Vision & Mission Summary Pill */}
               <div style={{ background: "#ffffff", padding: "24px 28px", borderRadius: "14px", border: "1px solid #e8ece8", boxShadow: "0 4px 14px rgba(0,0,0,0.02)" }}>
                 <div className="about-vision-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
@@ -199,12 +284,12 @@ export default function AboutPage() {
                       </div>
                       <BadgeCheck size={22} strokeWidth={1.5} style={{ color: "var(--green)" }} />
                     </div>
-                    <strong style={{ fontSize: "14.5px", color: "var(--dark)", display: "block", marginBottom: "4px", fontWeight: 500 }}>
-                      Chuẩn Mực Chất Lượng
-                    </strong>
-                    <span style={{ fontSize: "12.5px", color: "#77827d", lineHeight: 1.5, display: "block", fontWeight: 400 }}>
-                      100% hàng nhập trực tiếp từ nhà máy với chứng chỉ CO/CQ minh bạch.
-                    </span>
+                    <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--dark)", marginBottom: "4px" }}>
+                      Chính Hãng 100%
+                    </div>
+                    <p style={{ fontSize: "12.5px", color: "#66726d", lineHeight: 1.5, margin: 0, fontWeight: 400 }}>
+                      Mọi lô hàng đều có đầy đủ chứng chỉ chất lượng CO/CQ và hóa đơn VAT điện tử.
+                    </p>
                   </div>
 
                   {/* Pillar 02 */}
@@ -221,14 +306,14 @@ export default function AboutPage() {
                       <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "rgba(198, 161, 91, 0.12)", color: "var(--gold-dark)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: "13px" }}>
                         02
                       </div>
-                      <Handshake size={22} strokeWidth={1.5} style={{ color: "var(--green)" }} />
+                      <Award size={22} strokeWidth={1.5} style={{ color: "var(--green)" }} />
                     </div>
-                    <strong style={{ fontSize: "14.5px", color: "var(--dark)", display: "block", marginBottom: "4px", fontWeight: 500 }}>
-                      Báo Giá Trực Tiếp Nhà Máy
-                    </strong>
-                    <span style={{ fontSize: "12.5px", color: "#77827d", lineHeight: 1.5, display: "block", fontWeight: 400 }}>
-                      Chính sách chiết khấu tốt nhất tối ưu ngân sách công trình.
-                    </span>
+                    <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--dark)", marginBottom: "4px" }}>
+                      Giá Xuất Xưởng
+                    </div>
+                    <p style={{ fontSize: "12.5px", color: "#66726d", lineHeight: 1.5, margin: 0, fontWeight: 400 }}>
+                      Hệ thống phân phối cấp 1 giúp tối ưu giá nhập trực tiếp cho các nhà thầu và dự án.
+                    </p>
                   </div>
 
                   {/* Pillar 03 */}
@@ -247,12 +332,12 @@ export default function AboutPage() {
                       </div>
                       <Truck size={22} strokeWidth={1.5} style={{ color: "var(--green)" }} />
                     </div>
-                    <strong style={{ fontSize: "14.5px", color: "var(--dark)", display: "block", marginBottom: "4px", fontWeight: 500 }}>
-                      Vận Chuyển Siêu Tốc 24/7
-                    </strong>
-                    <span style={{ fontSize: "12.5px", color: "#77827d", lineHeight: 1.5, display: "block", fontWeight: 400 }}>
-                      Hệ thống xe cẩu chuyên dụng giao hàng tận chân công trình.
-                    </span>
+                    <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--dark)", marginBottom: "4px" }}>
+                      Giao Tận Chân Công Trình
+                    </div>
+                    <p style={{ fontSize: "12.5px", color: "#66726d", lineHeight: 1.5, margin: 0, fontWeight: 400 }}>
+                      Đội xe cẩu và tải chuyên dụng hạ hàng an toàn, đúng tiến độ thi công dầm sàn.
+                    </p>
                   </div>
 
                   {/* Pillar 04 */}
@@ -269,14 +354,14 @@ export default function AboutPage() {
                       <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "rgba(198, 161, 91, 0.12)", color: "var(--gold-dark)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: "13px" }}>
                         04
                       </div>
-                      <Award size={22} strokeWidth={1.5} style={{ color: "var(--green)" }} />
+                      <Handshake size={22} strokeWidth={1.5} style={{ color: "var(--green)" }} />
                     </div>
-                    <strong style={{ fontSize: "14.5px", color: "var(--dark)", display: "block", marginBottom: "4px", fontWeight: 500 }}>
-                      Đồng Hành & Bảo Hành
-                    </strong>
-                    <span style={{ fontSize: "12.5px", color: "#77827d", lineHeight: 1.5, display: "block", fontWeight: 400 }}>
-                      Tư vấn kỹ thuật tận tâm & bảo hành chính hãng lâu dài.
-                    </span>
+                    <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--dark)", marginBottom: "4px" }}>
+                      Tư Vấn Tận Tâm
+                    </div>
+                    <p style={{ fontSize: "12.5px", color: "#66726d", lineHeight: 1.5, margin: 0, fontWeight: 400 }}>
+                      Đội ngũ kỹ thuật bóc tách bản vẽ, tính toán khối lượng vật tư chính xác và tiết kiệm.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -284,56 +369,46 @@ export default function AboutPage() {
             </div>
 
           </div>
-
         </div>
       </section>
 
-      {/* 4. Năng Lực Phân Phối Vật Liệu Trọn Gói — WITH REALISTIC PRICES & COMPACT BUTTON */}
-      <section className="section" style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #eee" }}>
+      {/* 4. SẢN PHẨM & GIẢI PHÁP TIÊU BIỂU (Đồng bộ với mục 2 Section DANH MỤC trong settings) */}
+      <section className="section" style={{ background: "#ffffff", padding: "64px 0" }}>
         <div className="container">
-          <div className="head" style={{ textAlign: "left", marginBottom: "28px" }}>
-            <div className="eyebrow">DANH MỤC CUNG ỨNG TRỌN GÓI</div>
-            <h2>Năng Lực Phân Phối Vật Liệu Xây Dựng & Thiết Bị</h2>
-            <p>Cung cấp giải pháp trọn gói từ vật liệu thô đến thiết bị hoàn thiện chính hãng với chứng chỉ CO/CQ minh bạch.</p>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "28px", flexWrap: "wrap", gap: "14px" }}>
+            <div>
+              <div className="eyebrow" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "2px", color: "var(--gold)" }}>
+                DANH MỤC PHÂN PHỐI
+              </div>
+              <h2 style={{ fontSize: "28px", fontWeight: 500, color: "var(--dark)", marginTop: "6px" }}>
+                Giải Pháp Vật Liệu Toàn Diện
+              </h2>
+            </div>
+            <Link
+              href="/products"
+              className="btn"
+              style={{ background: "transparent", color: "var(--green)", border: "1px solid var(--green)", borderRadius: "6px", padding: "8px 16px", fontSize: "13px", fontWeight: 500 }}
+            >
+              Xem tất cả sản phẩm
+            </Link>
           </div>
 
-          <div className="categories" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
-            <Link href="/category/sat-thep" className="cat" style={{ backgroundImage: "url('/images/steel_construction.jpg')" }}>
-              <div>Sắt & thép xây dựng</div>
-            </Link>
-
-            <Link href="/category/ton-nhom" className="cat" style={{ backgroundImage: "url('/images/roofing_aluminum.jpg')" }}>
-              <div>Tôn & nhôm công trình</div>
-            </Link>
-
-            <Link href="/category/gach-men" className="cat" style={{ backgroundImage: "url('/images/ceramic_tiles.jpg')" }}>
-              <div>Gạch men & ốp lát</div>
-            </Link>
-
-            <Link href="/category/thiet-bi-ve-sinh" className="cat" style={{ backgroundImage: "url('/images/sanitary_ware.jpg')" }}>
-              <div>Thiết bị vệ sinh</div>
-            </Link>
-
-            <Link href="/category/gach-ngoi" className="cat" style={{ backgroundImage: "url('/images/roof_tiles.jpg')" }}>
-              <div>Ngói & mái lợp cao cấp</div>
-            </Link>
-
-            <Link href="/category/nhua-op" className="cat" style={{ backgroundImage: "url('/images/plastic_panel.jpg')" }}>
-              <div>Nhựa ốp trang trí</div>
-            </Link>
-
-            <Link href="/category/go" className="cat" style={{ backgroundImage: "url('/images/wood_material.jpg')" }}>
-              <div>Gỗ tự nhiên & công nghiệp</div>
-            </Link>
-
-            <Link href="/categories" className="cat" style={{ backgroundImage: "url('/images/hero_bright_architecture.jpg')" }}>
-              <div>Vật liệu Hoa Sen Home</div>
-            </Link>
+          <div className="categories" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+            {categories.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/category/${cat.slug}`}
+                className="cat"
+                style={{ backgroundImage: `url('${cat.image}')` }}
+              >
+                <div>{cat.name}</div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 5. DELICATE MINIMALIST ELEGANT CONTACT CARD */}
+      {/* 5. ĐỊA CHỈ & LIÊN HỆ */}
       <section style={{ padding: "56px 0", backgroundColor: "#fafafa" }}>
         <div className="container">
           <div style={{ marginBottom: "24px" }}>
@@ -346,125 +421,116 @@ export default function AboutPage() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: "24px", alignItems: "stretch" }} className="about-grid">
-            
-            {/* Google Maps iFrame */}
-            <div style={{ borderRadius: "12px", overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.06)", minHeight: "300px", border: "1px solid #e2e8e4" }}>
-              <iframe
-                title="Bản đồ Google Maps vị trí Hưng Vinh Phát"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14930.648215987!2d106.145!3d20.612!2m3!1f0!2f0!3f0!3m2!1i1024!2768!4f13.1!3m3!1m2!1s0x3135c3456789%3A0x123456789!2zVGjBtG4gxJDhu5NuZyBM4bqhYywgeMOjIEjGsG5nIEjDoCwgdMSpbmggSMawbmcgWcOqbg!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn"
-                width="100%"
-                height="100%"
-                style={{ border: 0, minHeight: "300px" }}
-                allowFullScreen={true}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
-            </div>
 
-            {/* DELICATE MINIMALIST ELEGANT CONTACT CARD */}
             <div
               style={{
-                backgroundColor: "#ffffff",
-                padding: "36px 30px",
-                borderRadius: "14px",
+                background: "#ffffff",
                 border: "1px solid #e8ece8",
+                borderRadius: "14px",
+                padding: "32px 28px",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between"
+                justifyContent: "space-between",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.02)"
               }}
             >
               <div>
-                <div style={{ fontSize: "11px", color: "var(--gold)", fontWeight: 600, letterSpacing: "2px", textTransform: "uppercase", marginBottom: "6px" }}>
-                  KHO BÃI & TRỤ SỞ VẬN CHUYỂN
-                </div>
-                <h3 style={{ fontSize: "22px", color: "var(--green)", marginBottom: "22px", fontWeight: 700 }}>
-                  Hưng Vinh Phát
+                <h3 style={{ fontSize: "20px", fontWeight: 600, color: "var(--dark)", marginBottom: "8px" }}>
+                  Tổng Kho & Văn Phòng Điều Hành
                 </h3>
+                <p style={{ color: "#66726d", fontSize: "14px", lineHeight: 1.6, margin: "0 0 24px", fontWeight: 400 }}>
+                  Quý khách hàng và đối tác có thể ghé thăm trực tiếp kho bãi để kiểm tra mẫu mã quy cách hoặc bốc hàng nhanh theo xe cẩu.
+                </p>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  
-                  {/* Address Field */}
-                  <div style={{ display: "flex", gap: "14px", alignItems: "flex-start", paddingBottom: "14px", borderBottom: "1px solid #f2f4f2" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
                     <MapPin size={18} strokeWidth={1.5} style={{ color: "var(--gold)", flexShrink: 0, marginTop: "3px" }} />
-                    <div style={{ lineHeight: 1.5 }}>
-                      <span style={{ color: "#88928e", fontSize: "12px", display: "block", fontWeight: 400, marginBottom: "2px" }}>
-                        Địa chỉ trụ sở & kho bãi:
-                      </span>
-                      <span style={{ color: "#2d3532", fontSize: "14px", fontWeight: 500 }}>
-                        {COMPANY_INFO.address}
-                      </span>
+                    <div>
+                      <strong style={{ fontSize: "13.5px", color: "var(--dark)", display: "block", fontWeight: 600 }}>Địa chỉ trụ sở</strong>
+                      <span style={{ fontSize: "13.5px", color: "#555", lineHeight: 1.5, fontWeight: 400 }}>{COMPANY_INFO.address}</span>
                     </div>
                   </div>
 
-                  {/* Hotlines Field */}
-                  <div style={{ display: "flex", gap: "14px", alignItems: "flex-start", paddingBottom: "14px", borderBottom: "1px solid #f2f4f2" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
                     <Phone size={18} strokeWidth={1.5} style={{ color: "var(--gold)", flexShrink: 0, marginTop: "3px" }} />
-                    <div style={{ lineHeight: 1.5 }}>
-                      <span style={{ color: "#88928e", fontSize: "12px", display: "block", fontWeight: 400, marginBottom: "2px" }}>
-                        Hotlines hỗ trợ:
-                      </span>
-                      <div style={{ fontSize: "14px", fontWeight: 500, color: "var(--green)" }}>
-                        <a href={`tel:${COMPANY_INFO.phoneRaw[0]}`} style={{ color: "var(--green)", fontWeight: 500 }}>{COMPANY_INFO.phones[0]}</a>
-                        <span style={{ color: "#ccc", margin: "0 8px", fontWeight: 300 }}>•</span>
-                        <a href={`tel:${COMPANY_INFO.phoneRaw[1]}`} style={{ color: "var(--green)", fontWeight: 500 }}>{COMPANY_INFO.phones[1]}</a>
+                    <div>
+                      <strong style={{ fontSize: "13.5px", color: "var(--dark)", display: "block", fontWeight: 600 }}>Điện thoại tư vấn / Báo giá dự án</strong>
+                      <div style={{ display: "flex", gap: "12px", marginTop: "2px", flexWrap: "wrap" }}>
+                        <a href={`tel:${COMPANY_INFO.phoneRaw[0]}`} style={{ color: "var(--green)", fontWeight: 600, fontSize: "14px", textDecoration: "none" }}>
+                          {COMPANY_INFO.phones[0]}
+                        </a>
+                        <span style={{ color: "#ccc" }}>•</span>
+                        <a href={`tel:${COMPANY_INFO.phoneRaw[1]}`} style={{ color: "var(--green)", fontWeight: 600, fontSize: "14px", textDecoration: "none" }}>
+                          {COMPANY_INFO.phones[1]}
+                        </a>
                       </div>
                     </div>
                   </div>
 
-                  {/* Email Field */}
-                  <div style={{ display: "flex", gap: "14px", alignItems: "flex-start", paddingBottom: "14px", borderBottom: "1px solid #f2f4f2" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
                     <Mail size={18} strokeWidth={1.5} style={{ color: "var(--gold)", flexShrink: 0, marginTop: "3px" }} />
-                    <div style={{ lineHeight: 1.5 }}>
-                      <span style={{ color: "#88928e", fontSize: "12px", display: "block", fontWeight: 400, marginBottom: "2px" }}>
-                        Email liên hệ:
-                      </span>
-                      <span style={{ color: "#2d3532", fontSize: "14px", fontWeight: 500 }}>
+                    <div>
+                      <strong style={{ fontSize: "13.5px", color: "var(--dark)", display: "block", fontWeight: 600 }}>Email liên hệ</strong>
+                      <a href={`mailto:${COMPANY_INFO.email}`} style={{ color: "var(--green)", fontSize: "13.5px", textDecoration: "none", fontWeight: 500 }}>
                         {COMPANY_INFO.email}
-                      </span>
+                      </a>
                     </div>
                   </div>
 
-                  {/* Hours Field */}
-                  <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
                     <Clock size={18} strokeWidth={1.5} style={{ color: "var(--gold)", flexShrink: 0, marginTop: "3px" }} />
-                    <div style={{ lineHeight: 1.5 }}>
-                      <span style={{ color: "#88928e", fontSize: "12px", display: "block", fontWeight: 400, marginBottom: "2px" }}>
-                        Giờ làm việc kho bãi:
-                      </span>
-                      <span style={{ color: "#2d3532", fontSize: "14px", fontWeight: 500 }}>
-                        7:30 — 17:30 (Thứ 2 — Chủ Nhật)
-                      </span>
+                    <div>
+                      <strong style={{ fontSize: "13.5px", color: "var(--dark)", display: "block", fontWeight: 600 }}>Thời gian làm việc</strong>
+                      <span style={{ fontSize: "13.5px", color: "#555", fontWeight: 400 }}>Thứ 2 – Thứ 7: 07:00 – 18:00 (Hỗ trợ 24/7 qua Hotline)</span>
                     </div>
                   </div>
-
                 </div>
               </div>
+            </div>
 
-              {/* REFINED ELEGANT DELICATE CALL BUTTON */}
-              <div style={{ marginTop: "24px", paddingTop: "18px", borderTop: "1px solid #edf0ee" }}>
-                <a
-                  href={`tel:${COMPANY_INFO.phoneRaw[0]}`}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #0b3b32 0%, #06231d 100%)",
+                color: "#ffffff",
+                borderRadius: "14px",
+                padding: "32px 28px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                boxShadow: "0 8px 24px rgba(11, 59, 50, 0.15)"
+              }}
+            >
+              <div>
+                <span className="eyebrow" style={{ color: "var(--gold)", letterSpacing: "2px", fontSize: "11px", fontWeight: 600 }}>
+                  KẾT NỐI NHANH
+                </span>
+                <h3 style={{ fontSize: "20px", color: "#ffffff", fontWeight: 500, margin: "6px 0 12px" }}>
+                  Yêu Cầu Báo Giá Khối Lượng
+                </h3>
+                <p style={{ color: "#d0dad5", fontSize: "13.5px", lineHeight: 1.6, margin: 0, fontWeight: 400 }}>
+                  Gửi danh mục hoặc bản vẽ bóc tách vật tư. Hưng Vinh Phát hỗ trợ kiểm tra quy cách và báo giá chiết khấu trực tiếp cho nhà thầu.
+                </p>
+              </div>
+
+              <div style={{ marginTop: "24px" }}>
+                <Link
+                  href="/#contact"
+                  className="btn"
                   style={{
-                    width: "100%",
-                    textAlign: "center",
-                    padding: "11px 18px",
-                    fontSize: "13.5px",
-                    borderRadius: "6px",
-                    fontWeight: 600,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    background: "var(--green)",
+                    background: "linear-gradient(135deg, #c6a15b 0%, #a88442 100%)",
                     color: "#ffffff",
-                    textDecoration: "none",
-                    letterSpacing: "0.3px",
-                    transition: "all 0.2s ease"
+                    display: "block",
+                    textAlign: "center",
+                    padding: "12px",
+                    borderRadius: "6px",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px"
                   }}
                 >
-                  <Phone size={15} />
-                  <span>Gọi Hotline Ngay</span>
-                </a>
+                  Gửi Yêu Cầu Báo Giá Ngay
+                </Link>
               </div>
             </div>
 

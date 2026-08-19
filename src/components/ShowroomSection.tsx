@@ -1,32 +1,79 @@
 import React from "react";
 import Link from "next/link";
+import {
+  pb,
+  getPbImageUrl,
+  PbBrandRecord,
+  PbSiteSettingsRecord
+} from "@/lib/pocketbase";
 
-interface BrandCardItem {
+interface HomeBrandItem {
+  id: string;
   name: string;
-  sub: string;
-  img: string;
-  categorySlug: string;
+  slug: string;
+  image: string;
+  description: string;
+  targetUrl: string;
 }
 
-const SHOWROOM_BRANDS: BrandCardItem[] = [
-  { name: "Hoa Sen", sub: "Tôn • Thép • Ống thép • Gạch • Ngói", img: "/images/roofing_aluminum.jpg", categorySlug: "ton-nhom" },
-  { name: "Hòa Phát", sub: "Sắt • Thép xây dựng • Ống thép", img: "/images/steel_construction.jpg", categorySlug: "sat-thep" },
-  { name: "Lustile", sub: "Gạch ốp lát Porcelain cao cấp", img: "/images/ceramic_tiles.jpg", categorySlug: "gach-men" },
-  { name: "Tuslo", sub: "Thiết bị nhà tắm & vệ sinh cao cấp", img: "/images/sanitary_ware.jpg", categorySlug: "thiet-bi-ve-sinh" },
-  { name: "Lustime", sub: "Ngói tráng men siêu nhẹ", img: "/images/roof_tiles.jpg", categorySlug: "gach-ngoi" },
-  { name: "Trường Thành", sub: "Nhôm hệ • Nhôm định hình • Phụ kiện", img: "/images/plastic_panel.jpg", categorySlug: "ton-nhom" },
-  { name: "Lustra", sub: "Gạch men cẩm thạch Ấn Độ", img: "/images/wood_material.jpg", categorySlug: "gach-men" },
-  { name: "Đức Việt", sub: "Sắt • Thép xây dựng móng", img: "/images/steel_construction.jpg", categorySlug: "sat-thep" },
-  { name: "Olympic", sub: "Tôn mạ màu • Tấm lợp cách nhiệt", img: "/images/roofing_aluminum.jpg", categorySlug: "ton-nhom" },
-  { name: "Vtec", sub: "Tôn mạ • Vật liệu lợp mái", img: "/images/hero_bright_architecture.jpg", categorySlug: "ton-nhom" },
-  { name: "Ngân Hoa", sub: "Ống nhựa & Phụ kiện cấp thoát nước", img: "/images/plastic_panel.jpg", categorySlug: "thiet-bi-ve-sinh" },
-  { name: "Nam Dương", sub: "Ống nhựa & Phụ kiện nhựa", img: "/images/plastic_panel.jpg", categorySlug: "thiet-bi-ve-sinh" },
-  { name: "Việt Xô", sub: "Nhựa • Ống & phụ kiện công trình", img: "/images/plastic_panel.jpg", categorySlug: "thiet-bi-ve-sinh" },
-  { name: "Việt Đức", sub: "Thép xây dựng • Thép cuộn", img: "/images/steel_construction.jpg", categorySlug: "sat-thep" },
-  { name: "VAS", sub: "Thép xây dựng • Thép móng công trình", img: "/images/steel_construction.jpg", categorySlug: "sat-thep" }
-];
+async function getHomeBrands(): Promise<HomeBrandItem[]> {
+  try {
+    // 1. Lấy danh sách thương hiệu được chọn trong settings
+    const settingsRes = await pb.collection("site_settings").getList<PbSiteSettingsRecord>(1, 1, {
+      filter: 'key = "homepage_customization"',
+      requestKey: null
+    });
+    const settings = settingsRes.items[0];
+    const selectedSlugs = settings?.selectedBrands || [];
 
-export default function ShowroomSection() {
+    // 2. Lấy toàn bộ thương hiệu từ PocketBase
+    const brandRecords = await pb.collection("brands").getFullList<PbBrandRecord>({
+      requestKey: null
+    });
+
+    if (brandRecords && brandRecords.length > 0) {
+      if (selectedSlugs.length > 0) {
+        // Khớp theo đúng danh sách thương hiệu đã chọn và thứ tự trong settings (tối đa 16 cái)
+        const matched = selectedSlugs
+          .map((slug) => brandRecords.find((b) => b.slug === slug))
+          .filter((b): b is PbBrandRecord => Boolean(b))
+          .slice(0, 16)
+          .map((b) => ({
+            id: b.id,
+            name: b.name,
+            slug: b.slug,
+            image: getPbImageUrl("brands", b.id, b.image) || "/images/logo.png",
+            description: b.description || "Đối tác chiến lược Hưng Vinh Phát",
+            targetUrl: `/brand/${b.slug}`
+          }));
+
+        if (matched.length > 0) {
+          return matched;
+        }
+      }
+
+      // Fallback lấy 16 thương hiệu đầu tiên từ PocketBase
+      return brandRecords.slice(0, 16).map((b) => ({
+        id: b.id,
+        name: b.name,
+        slug: b.slug,
+        image: getPbImageUrl("brands", b.id, b.image) || "/images/logo.png",
+        description: b.description || "Đối tác chiến lược Hưng Vinh Phát",
+        targetUrl: `/brand/${b.slug}`
+      }));
+    }
+  } catch (err) {
+    console.error("Lỗi tải thương hiệu showroom từ PocketBase:", err);
+  }
+
+  return [];
+}
+
+export default async function ShowroomSection() {
+  const brands = await getHomeBrands();
+
+  if (brands.length === 0) return null;
+
   return (
     <section className="section" id="showroom" style={{ background: "#fff" }}>
       <div className="container">
@@ -37,16 +84,23 @@ export default function ShowroomSection() {
         </div>
 
         <div className="brand-grid">
-          {SHOWROOM_BRANDS.map((item) => (
+          {brands.map((item) => (
             <Link
-              key={item.name}
-              href={`/category/${item.categorySlug}`}
+              key={item.id || item.slug}
+              href={item.targetUrl}
               className="brand-card"
             >
-              <div className="brand-img" style={{ backgroundImage: `url('${item.img}')` }}></div>
+              <div
+                className="brand-img"
+                style={{
+                  backgroundImage: `url('${item.image}')`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center"
+                }}
+              ></div>
               <div className="brand-body">
                 <b>{item.name.toUpperCase()}</b>
-                <span>{item.sub}</span>
+                <span>{item.description}</span>
               </div>
             </Link>
           ))}

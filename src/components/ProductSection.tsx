@@ -1,122 +1,99 @@
-"use client";
-
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  pb,
+  getPbImageUrl,
+  PbProductRecord,
+  PbSiteSettingsRecord
+} from "@/lib/pocketbase";
 import { SAMPLE_PRODUCTS } from "@/data/companyData";
-import ProductCard from "@/components/ProductCard";
+import ProductSlider, { HomeProductItem } from "@/components/ProductSlider";
 
-export default function ProductSection() {
+async function getHomeProducts(): Promise<HomeProductItem[]> {
+  try {
+    // 1. Lấy danh sách sản phẩm được chọn từ settings
+    const settingsRes = await pb.collection("site_settings").getList<PbSiteSettingsRecord>(1, 1, {
+      filter: 'key = "homepage_customization"',
+      requestKey: null
+    });
+    const settings = settingsRes.items[0];
+    const selectedKeys = settings?.selectedProducts || [];
 
-  const scrollLeft = () => {
-    const track = document.getElementById("product-slider-track");
-    if (track) {
-      track.scrollBy({ left: -track.clientWidth, behavior: "smooth" });
+    // 2. Lấy toàn bộ sản phẩm từ PocketBase
+    const prodRecords = await pb.collection("products").getFullList<PbProductRecord>({
+      requestKey: null
+    });
+
+    if (prodRecords && prodRecords.length > 0) {
+      if (selectedKeys.length > 0) {
+        // Khớp theo đúng danh sách sản phẩm đã chọn và thứ tự trong settings
+        const matched = selectedKeys
+          .map((key) => prodRecords.find((p) => p.slug === key || p.id === key))
+          .filter((p): p is PbProductRecord => Boolean(p))
+          .slice(0, 8)
+          .map((p) => {
+            const firstImg =
+              p.images && p.images.length > 0
+                ? getPbImageUrl("products", p.id, p.images[0])
+                : "/images/steel_construction.jpg";
+            return {
+              id: p.id,
+              name: p.name,
+              slug: p.slug,
+              price: p.price,
+              unit: p.unit,
+              image: firstImg,
+              description: p.description || "",
+              detailUrl: `/product/${p.slug || p.id}`
+            };
+          });
+
+        if (matched.length > 0) {
+          return matched;
+        }
+      }
+
+      // Fallback lấy tối đa 8 sản phẩm đầu tiên từ PocketBase
+      return prodRecords.slice(0, 8).map((p) => {
+        const firstImg =
+          p.images && p.images.length > 0
+            ? getPbImageUrl("products", p.id, p.images[0])
+            : "/images/steel_construction.jpg";
+        return {
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          price: p.price,
+          unit: p.unit,
+          image: firstImg,
+          description: p.description || "",
+          detailUrl: `/product/${p.slug || p.id}`
+        };
+      });
     }
-  };
+  } catch (err) {
+    console.error("Lỗi tải sản phẩm trang chủ từ PocketBase:", err);
+  }
 
-  const scrollRight = () => {
-    const track = document.getElementById("product-slider-track");
-    if (track) {
-      track.scrollBy({ left: track.clientWidth, behavior: "smooth" });
-    }
-  };
+  // Fallback nếu không có kết nối
+  return SAMPLE_PRODUCTS.slice(0, 8).map((p) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.id,
+    price: p.price,
+    unit: p.unit,
+    image: p.image || "/images/steel_construction.jpg",
+    description: p.description,
+    detailUrl: `/product/${p.id}`
+  }));
+}
+
+export default async function ProductSection() {
+  const products = await getHomeProducts();
 
   return (
     <section className="section" id="products" style={{ background: "#fafafa" }}>
       <div className="container">
-        {/* Section Header with Direct Scroll Buttons */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "28px", flexWrap: "wrap", gap: "16px" }}>
-          <div>
-            <div className="eyebrow" style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "2.5px", color: "var(--gold)" }}>
-              DANH MỤC SẢN PHẨM
-            </div>
-            <h2 style={{ fontSize: "28px", marginTop: "6px", color: "var(--dark)", fontWeight: 500 }}>
-              Vật liệu xây dựng & thiết bị
-            </h2>
-            <p style={{ color: "#66726d", fontSize: "14.5px", fontWeight: 400, margin: "4px 0 0" }}>
-              Hưng Vinh Phát cung cấp đa dạng vật liệu và thiết bị cho mọi công trình.
-            </p>
-          </div>
-
-          {/* Direct Prev / Next Buttons */}
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <button
-              onClick={scrollLeft}
-              type="button"
-              aria-label="Trượt sang trái"
-              style={{
-                width: "42px",
-                height: "42px",
-                borderRadius: "50%",
-                border: "1px solid #e2e8e4",
-                background: "#ffffff",
-                color: "var(--green)",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-                outline: "none"
-              }}
-            >
-              <ChevronLeft size={20} strokeWidth={1.5} />
-            </button>
-            <button
-              onClick={scrollRight}
-              type="button"
-              aria-label="Trượt sang phải"
-              style={{
-                width: "42px",
-                height: "42px",
-                borderRadius: "50%",
-                border: "1px solid var(--green)",
-                background: "var(--green)",
-                color: "#ffffff",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(11, 59, 50, 0.15)",
-                outline: "none"
-              }}
-            >
-              <ChevronRight size={20} strokeWidth={1.5} />
-            </button>
-          </div>
-        </div>
-
-        {/* Snap-aligned Horizontal Scroll Track using shared ProductCard */}
-        <div
-          id="product-slider-track"
-          style={{
-            display: "flex",
-            gap: "20px",
-            overflowX: "auto",
-            scrollSnapType: "x mandatory",
-            scrollBehavior: "smooth",
-            padding: "16px 6px 28px 6px",
-            margin: "-12px -6px -12px -6px",
-            width: "calc(100% + 12px)",
-            WebkitOverflowScrolling: "touch"
-          }}
-        >
-          {SAMPLE_PRODUCTS.map((product) => (
-            <ProductCard
-              key={product.id}
-              image={product.image}
-              name={product.name}
-              priceText={`${product.price} đ/${product.unit}`}
-              description={product.description}
-              detailUrl={`/product/${product.id}`}
-              style={{
-                minWidth: "270px",
-                maxWidth: "270px",
-                scrollSnapAlign: "start",
-                flexShrink: 0
-              }}
-            />
-          ))}
-        </div>
+        <ProductSlider products={products} />
       </div>
     </section>
   );

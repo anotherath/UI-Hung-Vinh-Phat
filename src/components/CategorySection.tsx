@@ -1,7 +1,77 @@
 import React from "react";
 import Link from "next/link";
+import {
+  pb,
+  getPbImageUrl,
+  PbCategoryRecord,
+  PbSiteSettingsRecord
+} from "@/lib/pocketbase";
+import { PRODUCT_CATEGORIES } from "@/data/companyData";
 
-export default function CategorySection() {
+interface HomeCategoryItem {
+  id?: string;
+  name: string;
+  slug: string;
+  image: string;
+}
+
+async function getHomeCategories(): Promise<HomeCategoryItem[]> {
+  try {
+    // 1. Lấy cấu hình ngành hàng được chọn trong settings
+    const settingsRes = await pb.collection("site_settings").getList<PbSiteSettingsRecord>(1, 1, {
+      filter: 'key = "homepage_customization"',
+      requestKey: null
+    });
+    const settings = settingsRes.items[0];
+    const selectedSlugs = settings?.selectedCategories || [];
+
+    // 2. Lấy toàn bộ ngành hàng từ PocketBase
+    const catRecords = await pb.collection("categories").getFullList<PbCategoryRecord>({
+      requestKey: null
+    });
+
+    if (catRecords && catRecords.length > 0) {
+      if (selectedSlugs.length > 0) {
+        // Lấy theo đúng danh sách slug đã chọn và thứ tự trong settings
+        const matched = selectedSlugs
+          .map((slug) => catRecords.find((c) => c.slug === slug))
+          .filter((c): c is PbCategoryRecord => Boolean(c))
+          .slice(0, 8)
+          .map((c) => ({
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            image: getPbImageUrl("categories", c.id, c.image) || "/images/steel_construction.jpg"
+          }));
+
+        if (matched.length > 0) {
+          return matched;
+        }
+      }
+
+      // Nếu chưa cấu hình, fallback lấy tối đa 8 ngành hàng đầu tiên từ PocketBase
+      return catRecords.slice(0, 8).map((c) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        image: getPbImageUrl("categories", c.id, c.image) || "/images/steel_construction.jpg"
+      }));
+    }
+  } catch (err) {
+    console.error("Lỗi tải danh mục trang chủ từ PocketBase:", err);
+  }
+
+  // Fallback nếu không kết nối được database
+  return PRODUCT_CATEGORIES.slice(0, 8).map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    image: c.image || "/images/steel_construction.jpg"
+  }));
+}
+
+export default async function CategorySection() {
+  const categories = await getHomeCategories();
+
   return (
     <section className="section">
       <div className="container">
@@ -11,31 +81,17 @@ export default function CategorySection() {
           <p>Từ phần thô đến hoàn thiện, lựa chọn phù hợp cho từng công trình.</p>
         </div>
 
-        <div className="categories" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
-          <Link href="/category/gach-men" className="cat" style={{ backgroundImage: "url('/images/ceramic_tiles.jpg')" }}>
-            <div>Gạch men ốp lát</div>
-          </Link>
-          <Link href="/category/thiet-bi-ve-sinh" className="cat" style={{ backgroundImage: "url('/images/sanitary_ware.jpg')" }}>
-            <div>Thiết bị vệ sinh</div>
-          </Link>
-          <Link href="/category/gach-ngoi" className="cat" style={{ backgroundImage: "url('/images/roof_tiles.jpg')" }}>
-            <div>Ngói & mái lợp</div>
-          </Link>
-          <Link href="/category/ton-nhom" className="cat" style={{ backgroundImage: "url('/images/roofing_aluminum.jpg')" }}>
-            <div>Tôn & nhôm công trình</div>
-          </Link>
-          <Link href="/category/sat-thep" className="cat" style={{ backgroundImage: "url('/images/steel_construction.jpg')" }}>
-            <div>Sắt & thép xây dựng</div>
-          </Link>
-          <Link href="/category/nhua-op" className="cat" style={{ backgroundImage: "url('/images/plastic_panel.jpg')" }}>
-            <div>Nhựa ốp trang trí</div>
-          </Link>
-          <Link href="/category/go" className="cat" style={{ backgroundImage: "url('/images/wood_material.jpg')" }}>
-            <div>Gỗ tự nhiên & công nghiệp</div>
-          </Link>
-          <Link href="/categories" className="cat" style={{ backgroundImage: "url('/images/hero_bright_architecture.jpg')" }}>
-            <div>Vật liệu Hoa Sen Home</div>
-          </Link>
+        <div className="categories" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+          {categories.map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/category/${cat.slug}`}
+              className="cat"
+              style={{ backgroundImage: `url('${cat.image}')` }}
+            >
+              <div>{cat.name}</div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
