@@ -92,7 +92,6 @@ export default function Footer() {
           <h3>Liên hệ</h3>
           <p>Hotline: <a href={`tel:${COMPANY_INFO.phoneRaw[0]}`} style={{ color: "#fff", fontWeight: 700 }}>{COMPANY_INFO.phones[0]}</a></p>
           <p>Hotline 2: <a href={`tel:${COMPANY_INFO.phoneRaw[1]}`} style={{ color: "#fff", fontWeight: 700 }}>{COMPANY_INFO.phones[1]}</a></p>
-          <p>Email: <a href={`mailto:${COMPANY_INFO.email}`} style={{ color: "#c0c8c5" }}>{COMPANY_INFO.email}</a></p>
           <p style={{ fontSize: "13px", color: "#c0c8c5", lineHeight: 1.5 }}>Địa chỉ: {COMPANY_INFO.address}</p>
         </div>
 
