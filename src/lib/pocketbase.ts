@@ -1,6 +1,10 @@
 import PocketBase, { RecordModel } from "pocketbase";
 
-export const PB_URL = process.env.NEXT_PUBLIC_POCKETBASE_URL || "http://100.126.72.36:8090";
+export const PB_URL =
+  process.env.NEXT_PUBLIC_POCKETBASE_URL ||
+  (typeof window !== "undefined" && window.location.hostname !== "localhost" && !window.location.hostname.includes("100.126.72.36")
+    ? "https://admin.hungvinhphat.com"
+    : "http://100.126.72.36:8090");
 
 export const pb = new PocketBase(PB_URL);
 
